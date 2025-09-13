@@ -1,0 +1,82 @@
+[
+  {
+    "user_message": "I'm feeling really stressed about my upcoming exams परीक्षा का बहुत डर है",
+    "bot_response": "मैं समझ सकता हूँ कि परीक्षा का समय कितना तनावपूर्ण होता है। आप अकेले नहीं हैं।\n\nHere are some helpful tips:\n• Break study into smaller chunks (छोटे भागों में बांटें)\n• Practice deep breathing (गहरी सांस लें)\n• Take regular breaks (नियमित विश्राम करें)\n• Sleep well (अच्छी नींद लें)\n\nआप कर सकते हैं! You've got this!",
+    "crisis_detected": false,
+    "category": "academic_stress",
+    "sentiment_score": 0.3,
+    "response_time": 1.2
+  },
+  {
+    "user_message": "I feel so lonely here, no friends घर की याद आती है",
+    "bot_response": "कॉलेज में अकेलापन महसूस करना बहुत आम बात है। आप इसमें अकेले नहीं हैं।\n\nSome suggestions:\n• Join campus clubs/activities (कैंपस activities में भाग लें)\n• Attend peer support groups (peer support groups में जाएं)\n• Start small conversations (छोटी बातचीत शुरू करें)\n• Be patient with yourself (अपने साथ धैर्य रखें)\n\nMaking friends takes time. यह समय भी गुजर जाएगा।",
+    "crisis_detected": false,
+    "category": "loneliness",
+    "sentiment_score": 0.2,
+    "response_time": 1.5
+  },
+  {
+    "user_message": "I can't handle the pressure anymore, want to end it all",
+    "bot_response": "🚨 मुझे आपकी बहुत चिंता हो रही है। आपकी जिंदगी बहुत कीमती है।\n\nPlease reach out immediately:\n📞 Campus Counselor Dr. Priya Sharma: 9152987821\n📞 24/7 Crisis Helpline: 1800-599-0019\n📞 Emergency: 112\n\nआप अकेले नहीं हैं। Help is available.",
+    "crisis_detected": true,
+    "category": "crisis",
+    "sentiment_score": 0.1,
+    "response_time": 0.8
+  },
+  {
+    "user_message": "How can I manage my time better?",
+    "bot_response": "Time management एक important skill है। यहाँ कुछ strategies हैं:\n\n• Create a daily schedule (दैनिक schedule बनाएं)\n• Prioritize tasks (priority order में काम करें)\n• Use the Pomodoro Technique (25 mins work + 5 mins break)\n• Avoid multitasking (एक समय में एक काम)\n• Set realistic goals (practical goals set करें)\n\nStart small and be consistent! आप definitely improve कर सकते हैं।",
+    "crisis_detected": false,
+    "category": "time_management",
+    "sentiment_score": 0.6,
+    "response_time": 1.3
+  },
+  {
+    "user_message": "My family has high expectations from me",
+    "bot_response": "Family pressure handle करना challenging हो सकता है। आप अकेले नहीं हैं।\n\nSome strategies:\n• Communicate openly with family (खुली बात करें)\n• Set realistic boundaries (अपनी limits बताएं)\n• Focus on your own goals (अपने goals पर focus करें)\n• Seek support from counselors (counselor से help लें)\n• Remember your worth isn't defined by achievements\n\nYou are valued for who you are, not just what you achieve. आप enough हैं।",
+    "crisis_detected": false,
+    "category": "family_pressure",
+    "sentiment_score": 0.4,
+    "response_time": 1.1
+  },
+  {
+    "user_message": "I'm having panic attacks before presentations",
+    "bot_response": "Presentation anxiety बहुत common है। आप अकेले नहीं हैं।\n\nImmediate coping strategies:\n• Deep breathing exercises (गहरी सांस लें)\n• Progressive muscle relaxation\n• Positive self-talk (अपने आप को encourage करें)\n• Practice beforehand (पहले से practice करें)\n• Visualize success (सफलता की कल्पना करें)\n\nRemember: Everyone gets nervous. यह normal है। With practice, it gets easier!",
+    "crisis_detected": false,
+    "category": "anxiety",
+    "sentiment_score": 0.35,
+    "response_time": 1.4
+  },
+  {
+    "user_message": "I miss home so much, want to drop out",
+    "bot_response": "घर की याद आना बिल्कुल normal है। आप बहुत मजबूत हैं।\n\nCoping strategies:\n• Video call family regularly (परिवार से video call करें)\n• Keep photos/memories close (तस्वीरें पास रखें)\n• Find comfort foods nearby (अपना पसंदीदा खाना ढूंढें)\n• Connect with students from your region (अपने क्षेत्र के students से मिलें)\n• Join cultural clubs (cultural activities में भाग लें)\n\nयह feeling temporary है। आप adapt कर जाएंगे। Give yourself time.",
+    "crisis_detected": false,
+    "category": "homesickness",
+    "sentiment_score": 0.3,
+    "response_time": 1.2
+  },
+  {
+    "user_message": "I failed my exam and feel like a complete failure",
+    "bot_response": "एक exam fail होना आपको failure नहीं बनाता। आप valuable हैं।\n\nRemember:\n• One exam doesn't define you (एक exam से सब कुछ नहीं)\n• Every successful person has faced failures\n• This is a learning opportunity (सीखने का मौका है)\n• You can retake/improve (दोबारा try कर सकते हैं)\n• Seek academic support if needed\n\nFailure is not the opposite of success, it's part of success. आप strong हैं और comeback कर सकते हैं।",
+    "crisis_detected": false,
+    "category": "academic_failure",
+    "sentiment_score": 0.25,
+    "response_time": 1.6
+  },
+  {
+    "user_message": "I can't sleep at night, my mind keeps racing",
+    "bot_response": "Sleep problems mental health को affect करती हैं। यह concern valid है।\n\nSleep hygiene tips:\n• Create a bedtime routine (सोने का routine बनाएं)\n• Avoid screens before bed (सोने से पहले phone/laptop नहीं)\n• Try meditation/relaxation (ध्यान करें)\n• Write worries in a journal (चिंताएं लिख दें)\n• Keep bedroom cool and dark\n• Avoid caffeine after 4 PM\n\nIf it continues, consider talking to a counselor. Good sleep is essential! आप better sleep deserve करते हैं।",
+    "crisis_detected": false,
+    "category": "sleep_issues",
+    "sentiment_score": 0.4,
+    "response_time": 1.3
+  },
+  {
+    "user_message": "Everyone seems so much smarter than me in class",
+    "bot_response": "Imposter syndrome college में बहुत common है। आप capable हैं।\n\nRemember:\n• You earned your place here (आप deserve करते हैं यहाँ होना)\n• Everyone has different strengths (सबकी अपनी abilities हैं)\n• Comparison steals joy (comparison से बचें)\n• Focus on your own growth (अपनी progress देखें)\n• Ask questions - it shows intelligence (पूछना समझदारी है)\n\nYou belong here. Smart isn't just one thing. आपमें भी unique talents हैं।",
+    "crisis_detected": false,
+    "category": "self_doubt",
+    "sentiment_score": 0.35,
+    "response_time": 1.4
+  }
+]

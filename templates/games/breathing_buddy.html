@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-blue-600 mb-4">🫁 Breathing Buddy</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">गहरी सांस लें और शांत हो जाएं - Deep breathing for relaxation</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="breathing-circle-container mb-8">
+                <div id="breathing-circle" class="breathing-circle">
+                    <div class="breathing-text">
+                        <span id="breathing-instruction">Breathe</span>
+                        <div id="breathing-count" class="text-sm mt-2">4</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls mb-6">
+                <button id="start-breathing" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold mr-4">
+                    Start Breathing Exercise
+                </button>
+                <button id="stop-breathing" class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-semibold" disabled>
+                    Stop
+                </button>
+            </div>
+            
+            <div class="settings mb-6">
+                <label class="block text-gray-700 mb-2">Breathing Pattern:</label>
+                <select id="breathing-pattern" class="border rounded px-3 py-2">
+                    <option value="478">4-7-8 Relaxation</option>
+                    <option value="444">4-4-4 Square Breathing</option>
+                    <option value="666">6-6-6 Deep Breathing</option>
+                </select>
+            </div>
+            
+            <div class="stats grid grid-cols-3 gap-4 text-center">
+                <div class="stat-item">
+                    <div id="session-breaths" class="text-2xl font-bold text-blue-600">0</div>
+                    <div class="text-sm text-gray-600">Breaths</div>
+                </div>
+                <div class="stat-item">
+                    <div id="session-time" class="text-2xl font-bold text-green-600">0</div>
+                    <div class="text-sm text-gray-600">Minutes</div>
+                </div>
+                <div class="stat-item">
+                    <div id="total-sessions" class="text-2xl font-bold text-purple-600">0</div>
+                    <div class="text-sm text-gray-600">Sessions</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.breathing-circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+
+.breathing-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    transition: transform 0.1s ease;
+    box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+}
+
+.breathing-text {
+    text-align: center;
+}
+
+.inhale {
+    animation: breatheIn var(--inhale-time) ease-in-out;
+}
+
+.hold {
+    animation: hold var(--hold-time) ease-in-out;
+}
+
+.exhale {
+    animation: breatheOut var(--exhale-time) ease-in-out;
+}
+
+@keyframes breatheIn {
+    from { transform: scale(1); }
+    to { transform: scale(1.5); }
+}
+
+@keyframes hold {
+    from, to { transform: scale(1.5); }
+}
+
+@keyframes breatheOut {
+    from { transform: scale(1.5); }
+    to { transform: scale(1); }
+}
+</style>
+
+<script>
+class BreathingBuddy {
+    constructor() {
+        this.isActive = false;
+        this.currentPhase = 'inhale';
+        this.breathCount = 0;
+        this.sessionStart = null;
+        this.patterns = {
+            '478': { inhale: 4, hold: 7, exhale: 8 },
+            '444': { inhale: 4, hold: 4, exhale: 4 },
+            '666': { inhale: 6, hold: 6, exhale: 6 }
+        };
+        this.currentPattern = this.patterns['478'];
+        this.phaseTimer = null;
+        
+        this.initializeElements();
+        this.loadStats();
+        this.setupEventListeners();
+    }
+    
+    initializeElements() {
+        this.circle = document.getElementById('breathing-circle');
+        this.instruction = document.getElementById('breathing-instruction');
+        this.countDisplay = document.getElementById('breathing-count');
+        this.startBtn = document.getElementById('start-breathing');
+        this.stopBtn = document.getElementById('stop-breathing');
+        this.patternSelect = document.getElementById('breathing-pattern');
+        this.sessionBreaths = document.getElementById('session-breaths');
+        this.sessionTime = document.getElementById('session-time');
+        this.totalSessions = document.getElementById('total-sessions');
+    }
+    
+    setupEventListeners() {
+        this.startBtn.addEventListener('click', () => this.startBreathing());
+        this.stopBtn.addEventListener('click', () => this.stopBreathing());
+        this.patternSelect.addEventListener('change', () => this.updatePattern());
+    }
+    
+    updatePattern() {
+        const selected = this.patternSelect.value;
+        this.currentPattern = this.patterns[selected];
+        if (this.isActive) {
+            this.stopBreathing();
+            setTimeout(() => this.startBreathing(), 500);
+        }
+    }
+    
+    startBreathing() {
+        this.isActive = true;
+        this.breathCount = 0;
+        this.sessionStart = Date.now();
+        this.startBtn.disabled = true;
+        this.stopBtn.disabled = false;
+        
+        this.startPhase('inhale');
+        this.updateSessionDisplay();
+    }
+    
+    stopBreathing() {
+        this.isActive = false;
+        this.startBtn.disabled = false;
+        this.stopBtn.disabled = true;
+        
+        if (this.phaseTimer) {
+            clearTimeout(this.phaseTimer);
+        }
+        
+        this.circle.className = 'breathing-circle';
+        this.instruction.textContent = 'Ready to breathe';
+        this.countDisplay.textContent = '';
+        
+        this.saveSession();
+    }
+    
+    startPhase(phase) {
+        if (!this.isActive) return;
+        
+        this.currentPhase = phase;
+        const duration = this.currentPattern[phase];
+        
+        // Update UI
+        this.circle.className = `breathing-circle ${phase}`;
+        this.circle.style.setProperty('--inhale-time', `${this.currentPattern.inhale}s`);
+        this.circle.style.setProperty('--hold-time', `${this.currentPattern.hold}s`);
+        this.circle.style.setProperty('--exhale-time', `${this.currentPattern.exhale}s`);
+        
+        // Update instruction
+        const instructions = {
+            'inhale': 'Breathe In',
+            'hold': 'Hold',
+            'exhale': 'Breathe Out'
+        };
+        this.instruction.textContent = instructions[phase];
+        
+        // Countdown
+        this.startCountdown(duration);
+        
+        // Schedule next phase
+        this.phaseTimer = setTimeout(() => {
+            const nextPhase = {
+                'inhale': 'hold',
+                'hold': 'exhale',
+                'exhale': 'inhale'
+            };
+            
+            if (phase === 'exhale') {
+                this.breathCount++;
+                this.updateSessionDisplay();
+            }
+            
+            this.startPhase(nextPhase[phase]);
+        }, duration * 1000);
+    }
+    
+    startCountdown(duration) {
+        let remaining = duration;
+        this.countDisplay.textContent = remaining;
+        
+        const countdown = setInterval(() => {
+            remaining--;
+            this.countDisplay.textContent = remaining;
+            
+            if (remaining <= 0 || !this.isActive) {
+                clearInterval(countdown);
+            }
+        }, 1000);
+    }
+    
+    updateSessionDisplay() {
+        this.sessionBreaths.textContent = this.breathCount;
+        
+        if (this.sessionStart) {
+            const minutes = Math.floor((Date.now() - this.sessionStart) / 60000);
+            this.sessionTime.textContent = minutes;
+        }
+    }
+    
+    saveSession() {
+        if (this.breathCount > 0) {
+            const stats = JSON.parse(localStorage.getItem('breathingBuddyStats') || '{}');
+            stats.totalSessions = (stats.totalSessions || 0) + 1;
+            stats.totalBreaths = (stats.totalBreaths || 0) + this.breathCount;
+            stats.totalMinutes = (stats.totalMinutes || 0) + Math.floor((Date.now() - this.sessionStart) / 60000);
+            
+            localStorage.setItem('breathingBuddyStats', JSON.stringify(stats));
+            this.loadStats();
+        }
+    }
+    
+    loadStats() {
+        const stats = JSON.parse(localStorage.getItem('breathingBuddyStats') || '{}');
+        this.totalSessions.textContent = stats.totalSessions || 0;
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new BreathingBuddy();
+});
+</script>
+{% endblock %}

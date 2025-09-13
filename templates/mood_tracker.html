@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                Daily Mood Tracker
+            </h1>
+            <p class="text-xl text-gray-600 hindi-text">
+                दैनिक मूड ट्रैकर - Monitor Your Mental Wellness
+            </p>
+            <p class="text-gray-600 mt-2">
+                Track your daily moods and emotions to better understand your mental health patterns
+            </p>
+        </div>
+
+        <!-- Mood Entry Form -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="smile" class="w-6 h-6 mr-3 text-blue-600"></i>
+                How are you feeling today?
+                <span class="text-sm font-normal text-gray-500 ml-2 hindi-text">(आज आप कैसा महसूस कर रहे हैं?)</span>
+            </h2>
+            
+            <form method="POST" action="/submit_mood" class="space-y-6">
+                <!-- Mood Sliders -->
+                <div class="grid md:grid-cols-3 gap-6">
+                    <!-- Mood Score -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                            <i data-lucide="smile" class="w-4 h-4 mr-2 text-blue-600"></i>
+                            Overall Mood (1-10)
+                            <span class="text-xs text-gray-500 ml-2 hindi-text">(समग्र मूड)</span>
+                        </label>
+                        <input type="range" name="mood_score" min="1" max="10" value="5" 
+                               class="w-full h-3 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-lg appearance-none cursor-pointer mood-slider"
+                               oninput="updateSliderValue(this, 'mood-value')">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Very Low</span>
+                            <span id="mood-value" class="font-bold text-blue-600 text-lg">5</span>
+                            <span>Excellent</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Energy Level -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                            <i data-lucide="zap" class="w-4 h-4 mr-2 text-green-600"></i>
+                            Energy Level (1-10)
+                            <span class="text-xs text-gray-500 ml-2 hindi-text">(ऊर्जा स्तर)</span>
+                        </label>
+                        <input type="range" name="energy_level" min="1" max="10" value="5" 
+                               class="w-full h-3 bg-gradient-to-r from-red-200 via-yellow-200 to-green-200 rounded-lg appearance-none cursor-pointer"
+                               oninput="updateSliderValue(this, 'energy-value')">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Exhausted</span>
+                            <span id="energy-value" class="font-bold text-green-600 text-lg">5</span>
+                            <span>Energized</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Stress Level -->
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700 flex items-center">
+                            <i data-lucide="alert-circle" class="w-4 h-4 mr-2 text-red-600"></i>
+                            Stress Level (1-10)
+                            <span class="text-xs text-gray-500 ml-2 hindi-text">(तनाव स्तर)</span>
+                        </label>
+                        <input type="range" name="stress_level" min="1" max="10" value="5" 
+                               class="w-full h-3 bg-gradient-to-r from-green-200 via-yellow-200 to-red-200 rounded-lg appearance-none cursor-pointer"
+                               oninput="updateSliderValue(this, 'stress-value')">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Calm</span>
+                            <span id="stress-value" class="font-bold text-red-600 text-lg">5</span>
+                            <span>Very Stressed</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Additional Details -->
+                <div class="grid md:grid-cols-2 gap-6 pt-6 border-t">
+                    <!-- Sleep Hours -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <i data-lucide="moon" class="w-4 h-4 mr-2 text-indigo-600"></i>
+                            Hours of Sleep Last Night
+                            <span class="text-xs text-gray-500 ml-2 hindi-text">(रात की नींद के घंटे)</span>
+                        </label>
+                        <input type="number" name="sleep_hours" min="0" max="24" step="0.5" 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="e.g., 7.5">
+                    </div>
+                    
+                    <!-- Mood Factors (Optional) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">What influenced your mood today?</label>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" class="mood-factor px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300" onclick="toggleFactor(this)">
+                                Work/Study
+                            </button>
+                            <button type="button" class="mood-factor px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300" onclick="toggleFactor(this)">
+                                Relationships
+                            </button>
+                            <button type="button" class="mood-factor px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300" onclick="toggleFactor(this)">
+                                Health
+                            </button>
+                            <button type="button" class="mood-factor px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300" onclick="toggleFactor(this)">
+                                Weather
+                            </button>
+                            <button type="button" class="mood-factor px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300" onclick="toggleFactor(this)">
+                                Exercise
+                            </button>
+                        </div>
+                        <input type="hidden" name="mood_factors" id="selected-factors" value="">
+                    </div>
+                </div>
+                
+                <!-- Notes Section -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                        <i data-lucide="edit-3" class="w-4 h-4 mr-2 text-gray-600"></i>
+                        Additional Notes (Optional)
+                        <span class="text-xs text-gray-500 ml-2 hindi-text">(अतिरिक्त टिप्पणियां)</span>
+                    </label>
+                    <textarea name="notes" rows="4" 
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                              placeholder="How are you feeling today? Any specific thoughts or events you'd like to remember?"></textarea>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex justify-center pt-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-lg transition duration-300 flex items-center shadow-lg hover:shadow-xl">
+                        <i data-lucide="save" class="w-5 h-5 mr-2"></i>
+                        Save Today's Mood Entry
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Mood History -->
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i data-lucide="calendar" class="w-6 h-6 mr-3 text-purple-600"></i>
+                    Your Mood Journey
+                    <span class="text-sm font-normal text-gray-500 ml-2 hindi-text">(आपकी मूड यात्रा)</span>
+                </h2>
+                {% if mood_entries|length > 7 %}
+                    <div class="text-sm text-gray-500">
+                        Showing last 30 entries
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if mood_entries %}
+                <div class="space-y-4 max-h-96 overflow-y-auto">
+                    {% for entry in mood_entries %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition duration-200">
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="flex items-center">
+                                    <div class="bg-blue-50 p-2 rounded-lg mr-3">
+                                        <i data-lucide="calendar" class="w-4 h-4 text-blue-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">{{ entry.created_at.strftime('%B %d, %Y') }}</p>
+                                        <p class="text-sm text-gray-500">{{ entry.created_at.strftime('%I:%M %p') }}</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Mood Visualization -->
+                                <div class="flex items-center space-x-1">
+                                    {% set mood_emoji = "😟" if entry.mood_score <= 3 else "😐" if entry.mood_score <= 6 else "🙂" if entry.mood_score <= 8 else "😊" %}
+                                    <span class="text-2xl">{{ mood_emoji }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Mood Metrics -->
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600">{{ entry.mood_score }}</div>
+                                    <div class="text-xs text-gray-500">Mood</div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: {{ (entry.mood_score / 10 * 100) }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600">{{ entry.energy_level }}</div>
+                                    <div class="text-xs text-gray-500">Energy</div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ (entry.energy_level / 10 * 100) }}%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-red-600">{{ entry.stress_level }}</div>
+                                    <div class="text-xs text-gray-500">Stress</div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                                        <div class="bg-red-500 h-2 rounded-full" style="width: {{ (entry.stress_level / 10 * 100) }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Info -->
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                {% if entry.sleep_hours %}
+                                    <i data-lucide="moon" class="w-3 h-3 mr-1"></i>
+                                    <span class="mr-4">{{ entry.sleep_hours }} hours sleep</span>
+                                {% endif %}
+                            </div>
+                            
+                            {% if entry.notes %}
+                                <div class="bg-gray-50 p-3 rounded-lg">
+                                    <p class="text-gray-700 text-sm italic">"{{ entry.notes }}"</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Mood Insights -->
+                {% set avg_mood = (mood_entries|sum(attribute='mood_score') / mood_entries|length)|round(1) if mood_entries %}
+                {% set avg_energy = (mood_entries|sum(attribute='energy_level') / mood_entries|length)|round(1) if mood_entries %}
+                {% set avg_stress = (mood_entries|sum(attribute='stress_level') / mood_entries|length)|round(1) if mood_entries %}
+                
+                <div class="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4 text-center">
+                        Your Mood Insights (Last {{ mood_entries|length }} entries)
+                    </h3>
+                    <div class="grid md:grid-cols-3 gap-4 text-center">
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600">{{ avg_mood }}</div>
+                            <p class="text-sm text-gray-600">Average Mood</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600">{{ avg_energy }}</div>
+                            <p class="text-sm text-gray-600">Average Energy</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg">
+                            <div class="text-2xl font-bold text-red-600">{{ avg_stress }}</div>
+                            <p class="text-sm text-gray-600">Average Stress</p>
+                        </div>
+                    </div>
+                </div>
+                
+            {% else %}
+                <div class="text-center py-12">
+                    <i data-lucide="calendar-x" class="w-16 h-16 text-gray-400 mx-auto mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-600 mb-2">No Mood Entries Yet</h3>
+                    <p class="text-gray-500 mb-4">Start tracking your daily mood to see patterns and insights over time</p>
+                    <p class="text-sm text-gray-400 hindi-text">अभी तक कोई मूड एंट्री नहीं है</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Tips Section -->
+        <div class="mt-8 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center hindi-text">
+                Mood Tracking Tips (मूड ट्रैकिंग सुझाव)
+            </h3>
+            <div class="grid md:grid-cols-2 gap-6 text-sm">
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700">Daily Consistency</h4>
+                    <ul class="space-y-1 text-gray-600">
+                        <li>• Track at the same time each day</li>
+                        <li>• Be honest about your feelings</li>
+                        <li>• Note what influences your mood</li>
+                    </ul>
+                </div>
+                <div class="space-y-2">
+                    <h4 class="font-semibold text-gray-700">Pattern Recognition</h4>
+                    <ul class="space-y-1 text-gray-600">
+                        <li>• Look for weekly or monthly trends</li>
+                        <li>• Identify triggers and positive influences</li>
+                        <li>• Share insights with your counselor</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function updateSliderValue(slider, outputId) {
+    document.getElementById(outputId).textContent = slider.value;
+}
+
+function toggleFactor(button) {
+    button.classList.toggle('bg-blue-100');
+    button.classList.toggle('border-blue-400');
+    button.classList.toggle('text-blue-800');
+    
+    // Update hidden input with selected factors
+    const selected = Array.from(document.querySelectorAll('.mood-factor.bg-blue-100'))
+                         .map(btn => btn.textContent);
+    document.getElementById('selected-factors').value = selected.join(',');
+}
+
+// Initialize slider values
+document.addEventListener('DOMContentLoaded', function() {
+    updateSliderValue(document.querySelector('input[name="mood_score"]'), 'mood-value');
+    updateSliderValue(document.querySelector('input[name="energy_level"]'), 'energy-value');
+    updateSliderValue(document.querySelector('input[name="stress_level"]'), 'stress-value');
+});
+</script>
+{% endblock %}

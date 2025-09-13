@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 text-white py-8">
+        <div class="container mx-auto px-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white bg-opacity-20 p-3 rounded-full">
+                        <i data-lucide="gamepad-2" class="w-8 h-8"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold">Wellness Games</h1>
+                        <p class="text-cyan-100 hindi-text">खेल कल्याण केंद्र</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-semibold">{{ session.student_name or 'Guest' }}</div>
+                        <div class="text-xs opacity-80">Welcome to Games</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 -mt-6">
+        <!-- Search Bar -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                <input type="text" 
+                       id="game-search" 
+                       placeholder="Search for games..." 
+                       class="w-full pl-12 pr-4 py-4 border-0 bg-gray-50 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- Category Filters -->
+        <div class="mb-8">
+            <div class="flex flex-wrap justify-center gap-4">
+                <button class="filter-btn active px-6 py-3 rounded-full font-semibold transition duration-300" data-category="all">
+                    All Games
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full font-semibold transition duration-300" data-category="mindfulness">
+                    Mindfulness
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full font-semibold transition duration-300" data-category="stress">
+                    Stress Relief
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full font-semibold transition duration-300" data-category="educational">
+                    Educational
+                </button>
+                <button class="filter-btn px-6 py-3 rounded-full font-semibold transition duration-300" data-category="wellness">
+                    Wellness
+                </button>
+            </div>
+        </div>
+
+        <!-- Games Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Breathing Buddy -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="mindfulness">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="wind" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Breathing Buddy</h3>
+                            <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-semibold">POPULAR</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Instant, confidential chat with AI therapist. 24/7 in Hindi & English</p>
+                        <p class="text-gray-500 text-xs hindi-text">सांस की तकनीक सीखें</p>
+                    </div>
+                </div>
+                <a href="/games/breathing_buddy" 
+                   class="block w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Start Breathing
+                </a>
+            </div>
+
+            <!-- Mood Tracking -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="wellness">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-orange-400 to-red-500 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="activity" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Meditation Garden</h3>
+                            <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-semibold">NEW</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Monitor emotional patterns and gain mindful insights पैटर्न</p>
+                        <p class="text-gray-500 text-xs hindi-text">ध्यान उद्यान बनाएं</p>
+                    </div>
+                </div>
+                <a href="/games/meditation_garden" 
+                   class="block w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Create Garden
+                </a>
+            </div>
+
+            <!-- Chakra Balance -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="wellness">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-purple-500 to-purple-700 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="sparkles" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Chakra Balance</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Connect with licensed mental health professionals से जुड़ें</p>
+                        <p class="text-gray-500 text-xs hindi-text">चक्र संतुलन खेल</p>
+                    </div>
+                </div>
+                <a href="/games/chakra_balance" 
+                   class="block w-full bg-gradient-to-r from-purple-500 to-purple-700 hover:from-purple-600 hover:to-purple-800 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Balance Chakras
+                </a>
+            </div>
+
+            <!-- Stress Ball Squeeze -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="stress">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-red-400 to-red-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="circle" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Stress Ball Squeeze</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Share and connect in moderated peer support groups में शेयर करें</p>
+                        <p class="text-gray-500 text-xs hindi-text">तनाव मुक्त करें</p>
+                    </div>
+                </div>
+                <a href="/games/stress_ball_squeeze" 
+                   class="block w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Squeeze Ball
+                </a>
+            </div>
+
+            <!-- Exam Anxiety Fighter -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="stress">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-orange-400 to-orange-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="sword" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Exam Anxiety Fighter</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Audio sessions for calm आध्यात्म और सजावट देते हैं</p>
+                        <p class="text-gray-500 text-xs hindi-text">परीक्षा चिंता से लड़ें</p>
+                    </div>
+                </div>
+                <a href="/games/exam_anxiety_fighter" 
+                   class="block w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Fight Anxiety
+                </a>
+            </div>
+
+            <!-- Habit Builder -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="educational">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-green-400 to-green-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="calendar-check" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Habit Builder</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Structured programs for mental well-being मानसिक स्वास्थ्य के लिए</p>
+                        <p class="text-gray-500 text-xs hindi-text">आदत निर्माता खेल</p>
+                    </div>
+                </div>
+                <a href="/games/habit_builder" 
+                   class="block w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Build Habits
+                </a>
+            </div>
+
+            <!-- Memory Palace -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="educational">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-pink-400 to-pink-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="building-2" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Memory Palace</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Build virtual study spaces and improve memory techniques</p>
+                        <p class="text-gray-500 text-xs hindi-text">स्मृति महल बनाएं</p>
+                    </div>
+                </div>
+                <a href="/games/memory_palace" 
+                   class="block w-full bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Build Palace
+                </a>
+            </div>
+
+            <!-- Emotion Detective -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="educational">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-gray-500 to-gray-700 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="search" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Emotion Detective</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Find emotional triggers through pattern recognition</p>
+                        <p class="text-gray-500 text-xs hindi-text">भावना जासूस खेल</p>
+                    </div>
+                </div>
+                <a href="/games/emotion_detective" 
+                   class="block w-full bg-gradient-to-r from-gray-500 to-gray-700 hover:from-gray-600 hover:to-gray-800 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Start Detection
+                </a>
+            </div>
+
+            <!-- Campus Compass -->
+            <div class="game-card bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition duration-300" data-category="educational">
+                <div class="flex items-start space-x-4 mb-6">
+                    <div class="bg-gradient-to-br from-indigo-400 to-indigo-600 p-4 rounded-2xl shadow-lg">
+                        <i data-lucide="compass" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold text-gray-800">Campus Compass</h3>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-2">Explore virtual campus to find wellness resources</p>
+                        <p class="text-gray-500 text-xs hindi-text">कैंपस कंपास खेल</p>
+                    </div>
+                </div>
+                <a href="/games/campus_compass" 
+                   class="block w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-xl text-center transition duration-300">
+                    Explore Campus
+                </a>
+            </div>
+        </div>
+
+        <!-- Back Button -->
+        <div class="text-center pb-12">
+            <a href="/chat" 
+               class="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold px-8 py-4 rounded-full shadow-lg transition duration-300">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span>Back to Chat</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Floating Chat Button -->
+    <div class="fixed bottom-6 right-6">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition duration-300">
+            <i data-lucide="message-circle" class="w-6 h-6"></i>
+        </button>
+    </div>
+</div>
+
+<style>
+.filter-btn {
+    background: #f3f4f6;
+    color: #6b7280;
+    border: 1px solid #e5e7eb;
+}
+
+.filter-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #6366f1);
+    color: white;
+    border: 1px solid #3b82f6;
+}
+
+.filter-btn:hover:not(.active) {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.game-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.game-card:hover {
+    transform: translateY(-4px);
+}
+
+.game-card.hidden {
+    display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('game-search');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const gameCards = document.querySelectorAll('.game-card');
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        gameCards.forEach(card => {
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            const description = card.querySelector('p').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+
+    // Filter functionality
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterBtns.forEach(b => b.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            const category = this.dataset.category;
+            
+            gameCards.forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Initialize Lucide icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
+</script>
+{% endblock %}

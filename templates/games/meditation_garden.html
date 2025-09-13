@@ -1,0 +1,511 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-4xl font-bold text-green-600 text-center mb-4">🌸 Meditation Garden</h1>
+        <p class="text-lg text-gray-600 text-center mb-8 hindi-text">ध्यान उद्यान - Create your peaceful zen space</p>
+        
+        <div class="grid lg:grid-cols-4 gap-6">
+            <!-- Tools Panel -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-lg font-semibold mb-4">Garden Tools</h3>
+                    
+                    <div class="tools mb-6">
+                        <button id="rake-tool" class="tool-btn active w-full mb-2 p-3 rounded border">
+                            🔱 Rake Sand
+                        </button>
+                        <button id="stone-tool" class="tool-btn w-full mb-2 p-3 rounded border">
+                            🪨 Place Stone
+                        </button>
+                        <button id="plant-tool" class="tool-btn w-full mb-2 p-3 rounded border">
+                            🌱 Add Plant
+                        </button>
+                        <button id="water-tool" class="tool-btn w-full mb-2 p-3 rounded border">
+                            💧 Water Garden
+                        </button>
+                    </div>
+                    
+                    <div class="patterns mb-6">
+                        <h4 class="font-semibold mb-2">Sand Patterns:</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button class="pattern-btn" data-pattern="circles">⭕ Circles</button>
+                            <button class="pattern-btn" data-pattern="waves">〰️ Waves</button>
+                            <button class="pattern-btn" data-pattern="spiral">🌀 Spiral</button>
+                            <button class="pattern-btn" data-pattern="zen">☯️ Zen</button>
+                        </div>
+                    </div>
+                    
+                    <div class="meditation-controls">
+                        <h4 class="font-semibold mb-2">Meditation:</h4>
+                        <button id="start-meditation" class="w-full bg-green-600 text-white p-2 rounded">
+                            🧘‍♀️ Start Meditation
+                        </button>
+                        <div id="meditation-timer" class="text-center mt-2 hidden">
+                            <div class="text-2xl font-bold">05:00</div>
+                            <div class="text-sm">Meditation Time</div>
+                        </div>
+                    </div>
+                    
+                    <div class="garden-stats mt-6">
+                        <h4 class="font-semibold mb-2">Garden Progress:</h4>
+                        <div class="stat-item mb-2">
+                            <span>Peace Level:</span>
+                            <div class="w-full bg-gray-200 rounded h-2 mt-1">
+                                <div id="peace-level" class="bg-green-500 h-2 rounded" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Elements: <span id="element-count">0</span>/20
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Garden Canvas -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div id="garden-container" class="relative">
+                        <canvas id="garden-canvas" width="800" height="600" class="border-2 border-gray-200 rounded-lg cursor-crosshair w-full"></canvas>
+                        <div id="meditation-overlay" class="absolute inset-0 bg-black bg-opacity-50 rounded-lg hidden flex items-center justify-center">
+                            <div class="text-white text-center">
+                                <h3 class="text-2xl mb-4">🧘‍♀️ Meditation in Progress</h3>
+                                <p class="mb-4">Focus on your breathing and the peaceful garden you've created</p>
+                                <div id="meditation-instructions" class="text-lg font-semibold"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="garden-actions mt-4 flex justify-between">
+                        <button id="clear-garden" class="bg-red-600 text-white px-4 py-2 rounded">
+                            Clear Garden
+                        </button>
+                        <button id="save-garden" class="bg-blue-600 text-white px-4 py-2 rounded">
+                            Save Garden
+                        </button>
+                        <button id="generate-garden" class="bg-purple-600 text-white px-4 py-2 rounded">
+                            Generate Random
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-8">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.tool-btn, .pattern-btn {
+    transition: all 0.3s ease;
+}
+
+.tool-btn:hover, .pattern-btn:hover {
+    background-color: #f3f4f6;
+}
+
+.tool-btn.active {
+    background-color: #3B82F6;
+    color: white;
+}
+
+.pattern-btn {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #d1d5db;
+}
+
+.pattern-btn:hover {
+    border-color: #3B82F6;
+}
+
+#garden-canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+.meditation-guide {
+    animation: fade 2s ease-in-out infinite;
+}
+
+@keyframes fade {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+</style>
+
+<script>
+class MeditationGarden {
+    constructor() {
+        this.canvas = document.getElementById('garden-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.currentTool = 'rake';
+        this.currentPattern = 'circles';
+        this.elements = [];
+        this.isDrawing = false;
+        this.meditationActive = false;
+        this.meditationTimer = null;
+        this.elementCount = 0;
+        this.peaceLevel = 0;
+        
+        this.initializeCanvas();
+        this.setupEventListeners();
+        this.loadGarden();
+        this.drawBackground();
+    }
+    
+    initializeCanvas() {
+        // Set canvas size
+        const container = document.getElementById('garden-container');
+        const rect = container.getBoundingClientRect();
+        this.canvas.width = Math.min(800, rect.width - 48);
+        this.canvas.height = 600;
+        
+        // Draw initial sand background
+        this.drawBackground();
+    }
+    
+    setupEventListeners() {
+        // Tool selection
+        document.querySelectorAll('.tool-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                this.currentTool = e.target.id.replace('-tool', '');
+            });
+        });
+        
+        // Pattern selection
+        document.querySelectorAll('.pattern-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.currentPattern = e.target.dataset.pattern;
+            });
+        });
+        
+        // Canvas interactions
+        this.canvas.addEventListener('mousedown', (e) => this.startDrawing(e));
+        this.canvas.addEventListener('mousemove', (e) => this.draw(e));
+        this.canvas.addEventListener('mouseup', () => this.stopDrawing());
+        this.canvas.addEventListener('click', (e) => this.placeElement(e));
+        
+        // Touch events for mobile
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = this.canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            this.placeElement({ offsetX: x, offsetY: y });
+        });
+        
+        // Meditation controls
+        document.getElementById('start-meditation').addEventListener('click', () => this.startMeditation());
+        
+        // Garden actions
+        document.getElementById('clear-garden').addEventListener('click', () => this.clearGarden());
+        document.getElementById('save-garden').addEventListener('click', () => this.saveGarden());
+        document.getElementById('generate-garden').addEventListener('click', () => this.generateRandomGarden());
+    }
+    
+    drawBackground() {
+        // Draw sand background
+        this.ctx.fillStyle = '#F4E4BC';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Add subtle sand texture
+        for (let i = 0; i < 1000; i++) {
+            this.ctx.fillStyle = `rgba(218, 165, 32, ${Math.random() * 0.1})`;
+            this.ctx.fillRect(
+                Math.random() * this.canvas.width,
+                Math.random() * this.canvas.height,
+                1, 1
+            );
+        }
+    }
+    
+    startDrawing(e) {
+        if (this.currentTool === 'rake') {
+            this.isDrawing = true;
+            this.draw(e);
+        }
+    }
+    
+    draw(e) {
+        if (!this.isDrawing || this.currentTool !== 'rake') return;
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        this.drawPattern(x, y);
+        this.increasePeace(0.5);
+    }
+    
+    stopDrawing() {
+        this.isDrawing = false;
+    }
+    
+    drawPattern(x, y) {
+        this.ctx.strokeStyle = '#D2B48C';
+        this.ctx.lineWidth = 2;
+        this.ctx.lineCap = 'round';
+        
+        switch (this.currentPattern) {
+            case 'circles':
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 10, 0, 2 * Math.PI);
+                this.ctx.stroke();
+                break;
+                
+            case 'waves':
+                this.ctx.beginPath();
+                this.ctx.moveTo(x - 15, y);
+                this.ctx.quadraticCurveTo(x, y - 10, x + 15, y);
+                this.ctx.stroke();
+                break;
+                
+            case 'spiral':
+                this.ctx.beginPath();
+                for (let i = 0; i < 20; i++) {
+                    const angle = i * 0.3;
+                    const radius = i * 0.5;
+                    const spiralX = x + Math.cos(angle) * radius;
+                    const spiralY = y + Math.sin(angle) * radius;
+                    if (i === 0) this.ctx.moveTo(spiralX, spiralY);
+                    else this.ctx.lineTo(spiralX, spiralY);
+                }
+                this.ctx.stroke();
+                break;
+                
+            case 'zen':
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 8, 0, Math.PI);
+                this.ctx.stroke();
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 8, Math.PI, 2 * Math.PI);
+                this.ctx.stroke();
+                break;
+        }
+    }
+    
+    placeElement(e) {
+        if (this.currentTool === 'rake') return;
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = e.offsetX || (e.clientX - rect.left);
+        const y = e.offsetY || (e.clientY - rect.top);
+        
+        const element = {
+            type: this.currentTool,
+            x: x,
+            y: y,
+            id: Date.now()
+        };
+        
+        this.elements.push(element);
+        this.drawElement(element);
+        this.elementCount++;
+        this.increasePeace(5);
+        this.updateStats();
+    }
+    
+    drawElement(element) {
+        const { type, x, y } = element;
+        
+        switch (type) {
+            case 'stone':
+                this.ctx.fillStyle = '#696969';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x, y, 15, 10, 0, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                // Stone highlight
+                this.ctx.fillStyle = '#A9A9A9';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x - 3, y - 2, 5, 3, 0, 0, 2 * Math.PI);
+                this.ctx.fill();
+                break;
+                
+            case 'plant':
+                // Plant stem
+                this.ctx.strokeStyle = '#228B22';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, y);
+                this.ctx.lineTo(x, y - 20);
+                this.ctx.stroke();
+                
+                // Leaves
+                this.ctx.fillStyle = '#32CD32';
+                this.ctx.beginPath();
+                this.ctx.ellipse(x - 8, y - 15, 8, 5, -0.5, 0, 2 * Math.PI);
+                this.ctx.fill();
+                this.ctx.beginPath();
+                this.ctx.ellipse(x + 8, y - 15, 8, 5, 0.5, 0, 2 * Math.PI);
+                this.ctx.fill();
+                break;
+                
+            case 'water':
+                // Water droplet effect
+                this.ctx.fillStyle = 'rgba(135, 206, 235, 0.6)';
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 12, 0, 2 * Math.PI);
+                this.ctx.fill();
+                
+                // Ripple effect
+                this.ctx.strokeStyle = 'rgba(135, 206, 235, 0.8)';
+                this.ctx.lineWidth = 2;
+                this.ctx.beginPath();
+                this.ctx.arc(x, y, 20, 0, 2 * Math.PI);
+                this.ctx.stroke();
+                break;
+        }
+    }
+    
+    increasePeace(amount) {
+        this.peaceLevel = Math.min(100, this.peaceLevel + amount);
+        this.updateStats();
+    }
+    
+    updateStats() {
+        document.getElementById('peace-level').style.width = this.peaceLevel + '%';
+        document.getElementById('element-count').textContent = this.elementCount;
+    }
+    
+    startMeditation() {
+        this.meditationActive = true;
+        const overlay = document.getElementById('meditation-overlay');
+        const timer = document.getElementById('meditation-timer');
+        const instructions = document.getElementById('meditation-instructions');
+        
+        overlay.classList.remove('hidden');
+        timer.classList.remove('hidden');
+        
+        let timeLeft = 300; // 5 minutes
+        const meditationSteps = [
+            "Focus on your breathing...",
+            "Notice the peaceful garden you created...",
+            "Let go of any stress or worry...",
+            "Feel the calmness surrounding you...",
+            "Continue breathing deeply..."
+        ];
+        
+        this.meditationTimer = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timer.querySelector('.text-2xl').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change instructions every minute
+            const stepIndex = Math.floor((300 - timeLeft) / 60);
+            if (stepIndex < meditationSteps.length) {
+                instructions.textContent = meditationSteps[stepIndex];
+            }
+            
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                this.endMeditation();
+            }
+        }, 1000);
+        
+        // Play meditation end sound
+        overlay.addEventListener('click', () => this.endMeditation());
+    }
+    
+    endMeditation() {
+        clearInterval(this.meditationTimer);
+        this.meditationActive = false;
+        
+        document.getElementById('meditation-overlay').classList.add('hidden');
+        document.getElementById('meditation-timer').classList.add('hidden');
+        
+        this.increasePeace(20);
+        this.showAchievement("Meditation Complete! Inner peace increased.");
+    }
+    
+    clearGarden() {
+        this.elements = [];
+        this.elementCount = 0;
+        this.peaceLevel = 0;
+        this.drawBackground();
+        this.updateStats();
+    }
+    
+    saveGarden() {
+        const gardenData = {
+            elements: this.elements,
+            elementCount: this.elementCount,
+            peaceLevel: this.peaceLevel
+        };
+        localStorage.setItem('meditationGarden', JSON.stringify(gardenData));
+        this.showAchievement("Garden saved successfully!");
+    }
+    
+    loadGarden() {
+        const saved = localStorage.getItem('meditationGarden');
+        if (saved) {
+            const gardenData = JSON.parse(saved);
+            this.elements = gardenData.elements || [];
+            this.elementCount = gardenData.elementCount || 0;
+            this.peaceLevel = gardenData.peaceLevel || 0;
+            
+            this.redrawGarden();
+            this.updateStats();
+        }
+    }
+    
+    redrawGarden() {
+        this.drawBackground();
+        this.elements.forEach(element => this.drawElement(element));
+    }
+    
+    generateRandomGarden() {
+        this.clearGarden();
+        
+        const tools = ['stone', 'plant', 'water'];
+        const numElements = Math.floor(Math.random() * 15) + 10;
+        
+        for (let i = 0; i < numElements; i++) {
+            const tool = tools[Math.floor(Math.random() * tools.length)];
+            const x = Math.random() * (this.canvas.width - 40) + 20;
+            const y = Math.random() * (this.canvas.height - 40) + 20;
+            
+            this.currentTool = tool;
+            this.placeElement({ offsetX: x, offsetY: y });
+        }
+        
+        // Add some rake patterns
+        for (let i = 0; i < 5; i++) {
+            const x = Math.random() * this.canvas.width;
+            const y = Math.random() * this.canvas.height;
+            this.drawPattern(x, y);
+        }
+        
+        this.increasePeace(30);
+        this.showAchievement("Random peaceful garden generated!");
+    }
+    
+    showAchievement(message) {
+        // Simple alert for now - can be enhanced with better UI
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50';
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+}
+
+// Initialize the garden
+document.addEventListener('DOMContentLoaded', () => {
+    new MeditationGarden();
+});
+</script>
+{% endblock %}

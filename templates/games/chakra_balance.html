@@ -1,0 +1,464 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-yellow-600 mb-4">🟡 Chakra Balance</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">चक्र संतुलन - Match colors to chakras for emotional balance</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="chakra-game-container mb-8">
+                <div id="chakra-wheel" class="chakra-wheel mx-auto"></div>
+            </div>
+            
+            <div class="color-palette mb-6">
+                <h3 class="text-lg font-semibold mb-4">Select a Color:</h3>
+                <div id="color-buttons" class="flex justify-center space-x-4 flex-wrap gap-2"></div>
+            </div>
+            
+            <div class="chakra-info mb-6 p-4 bg-gray-100 rounded-lg">
+                <h4 class="font-semibold mb-2">Chakra Information:</h4>
+                <div id="chakra-description" class="text-sm text-gray-700">
+                    Click on a chakra segment to learn about it and match its color!
+                </div>
+            </div>
+            
+            <div class="game-stats grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div id="score" class="text-2xl font-bold text-yellow-600">0</div>
+                    <div class="text-sm text-gray-600">Score</div>
+                </div>
+                <div>
+                    <div id="balanced-chakras" class="text-2xl font-bold text-green-600">0/7</div>
+                    <div class="text-sm text-gray-600">Balanced</div>
+                </div>
+                <div>
+                    <div id="harmony-level" class="text-2xl font-bold text-purple-600">0%</div>
+                    <div class="text-sm text-gray-600">Harmony</div>
+                </div>
+            </div>
+            
+            <div class="controls mt-6">
+                <button id="reset-game" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg mr-4">
+                    Reset Chakras
+                </button>
+                <button id="meditate-btn" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg">
+                    🧘‍♀️ Chakra Meditation
+                </button>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.chakra-wheel {
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle, #ffffff 20%, #f0f0f0 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.chakra-segment {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    transform-origin: 100% 100%;
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 12px;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+}
+
+.chakra-segment:hover {
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+.chakra-segment.matched {
+    border-color: #ffd700;
+    border-width: 3px;
+    box-shadow: 0 0 15px rgba(255,215,0,0.8);
+}
+
+.color-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 4px;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+    border-color: #374151;
+}
+
+.color-btn.selected {
+    border-color: #374151;
+    border-width: 4px;
+    transform: scale(1.15);
+}
+
+.meditation-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.meditation-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+    max-width: 500px;
+}
+
+@keyframes chakraGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+.chakra-glow {
+    animation: chakraGlow 2s ease-in-out infinite;
+}
+</style>
+
+<script>
+class ChakraBalanceGame {
+    constructor() {
+        this.chakras = [
+            {
+                name: 'Root',
+                color: '#DC2626',
+                angle: 0,
+                description: 'Root Chakra (Muladhara) - Represents grounding, stability, and survival instincts.',
+                matched: false
+            },
+            {
+                name: 'Sacral',
+                color: '#EA580C',
+                angle: 51.4,
+                description: 'Sacral Chakra (Svadhisthana) - Governs creativity, sexuality, and emotional balance.',
+                matched: false
+            },
+            {
+                name: 'Solar',
+                color: '#FACC15',
+                angle: 102.8,
+                description: 'Solar Plexus Chakra (Manipura) - Center of personal power and confidence.',
+                matched: false
+            },
+            {
+                name: 'Heart',
+                color: '#16A34A',
+                angle: 154.2,
+                description: 'Heart Chakra (Anahata) - Love, compassion, and emotional healing.',
+                matched: false
+            },
+            {
+                name: 'Throat',
+                color: '#2563EB',
+                angle: 205.6,
+                description: 'Throat Chakra (Vishuddha) - Communication, truth, and self-expression.',
+                matched: false
+            },
+            {
+                name: 'Third Eye',
+                color: '#7C3AED',
+                angle: 257,
+                description: 'Third Eye Chakra (Ajna) - Intuition, wisdom, and spiritual insight.',
+                matched: false
+            },
+            {
+                name: 'Crown',
+                color: '#A855F7',
+                angle: 308.4,
+                description: 'Crown Chakra (Sahasrara) - Spiritual connection and enlightenment.',
+                matched: false
+            }
+        ];
+        
+        this.selectedColor = null;
+        this.score = 0;
+        this.balancedCount = 0;
+        
+        this.initializeGame();
+        this.loadProgress();
+    }
+    
+    initializeGame() {
+        this.createChakraWheel();
+        this.createColorPalette();
+        this.setupEventListeners();
+        this.updateStats();
+    }
+    
+    createChakraWheel() {
+        const wheel = document.getElementById('chakra-wheel');
+        wheel.innerHTML = '';
+        
+        this.chakras.forEach((chakra, index) => {
+            const segment = document.createElement('div');
+            segment.className = 'chakra-segment';
+            segment.dataset.chakraIndex = index;
+            segment.textContent = chakra.name;
+            
+            // Calculate position
+            segment.style.transform = `rotate(${chakra.angle}deg) skewY(-25.7deg)`;
+            segment.style.backgroundColor = chakra.matched ? chakra.color : '#E5E7EB';
+            
+            if (chakra.matched) {
+                segment.classList.add('matched');
+            }
+            
+            segment.addEventListener('click', () => this.selectChakra(index));
+            wheel.appendChild(segment);
+        });
+    }
+    
+    createColorPalette() {
+        const container = document.getElementById('color-buttons');
+        container.innerHTML = '';
+        
+        this.chakras.forEach((chakra, index) => {
+            const button = document.createElement('button');
+            button.className = 'color-btn';
+            button.style.backgroundColor = chakra.color;
+            button.dataset.colorIndex = index;
+            button.addEventListener('click', () => this.selectColor(index));
+            container.appendChild(button);
+        });
+    }
+    
+    selectColor(colorIndex) {
+        // Remove previous selection
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        // Select new color
+        const colorBtn = document.querySelector(`[data-color-index="${colorIndex}"]`);
+        colorBtn.classList.add('selected');
+        this.selectedColor = colorIndex;
+    }
+    
+    selectChakra(chakraIndex) {
+        const chakra = this.chakras[chakraIndex];
+        
+        // Show chakra information
+        document.getElementById('chakra-description').textContent = chakra.description;
+        
+        // If no color selected, just show info
+        if (this.selectedColor === null) {
+            return;
+        }
+        
+        // If chakra already matched, return
+        if (chakra.matched) {
+            return;
+        }
+        
+        // Check if colors match
+        if (this.selectedColor === chakraIndex) {
+            // Correct match!
+            chakra.matched = true;
+            this.score += 100;
+            this.balancedCount++;
+            
+            // Update visual
+            const segment = document.querySelector(`[data-chakra-index="${chakraIndex}"]`);
+            segment.style.backgroundColor = chakra.color;
+            segment.classList.add('matched', 'chakra-glow');
+            
+            // Play success sound
+            this.playSound('success');
+            
+            // Show achievement
+            this.showAchievement(`${chakra.name} Chakra Balanced! 🎉`);
+            
+            // Check if all chakras balanced
+            if (this.balancedCount === this.chakras.length) {
+                this.completeGame();
+            }
+        } else {
+            // Wrong match
+            this.playSound('error');
+            this.showAchievement(`Not the right color for ${chakra.name} Chakra. Try again!`);
+        }
+        
+        this.updateStats();
+        this.saveProgress();
+        
+        // Reset color selection
+        this.selectedColor = null;
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+    }
+    
+    updateStats() {
+        document.getElementById('score').textContent = this.score;
+        document.getElementById('balanced-chakras').textContent = `${this.balancedCount}/7`;
+        
+        const harmonyLevel = Math.round((this.balancedCount / 7) * 100);
+        document.getElementById('harmony-level').textContent = harmonyLevel + '%';
+    }
+    
+    completeGame() {
+        setTimeout(() => {
+            this.showAchievement('🌟 All Chakras Balanced! Perfect Harmony Achieved! 🌟');
+            this.startChakraMeditation();
+        }, 1000);
+    }
+    
+    startChakraMeditation() {
+        const overlay = document.createElement('div');
+        overlay.className = 'meditation-overlay';
+        overlay.innerHTML = `
+            <div class="meditation-content">
+                <h3 class="text-2xl font-bold mb-4">🧘‍♀️ Chakra Meditation</h3>
+                <p class="mb-4">You've achieved perfect chakra balance! Take a moment to meditate and feel the harmony.</p>
+                <div id="meditation-timer" class="text-3xl font-bold mb-4">03:00</div>
+                <p class="text-sm text-gray-600 mb-4">Close your eyes, breathe deeply, and visualize each chakra glowing with its perfect color.</p>
+                <button onclick="this.parentElement.parentElement.remove()" class="bg-purple-600 text-white px-4 py-2 rounded">
+                    End Meditation
+                </button>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Start meditation timer
+        let timeLeft = 180; // 3 minutes
+        const timer = document.getElementById('meditation-timer');
+        
+        const interval = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            timeLeft--;
+            
+            if (timeLeft < 0) {
+                clearInterval(interval);
+                overlay.remove();
+                this.showAchievement('Meditation Complete! Inner harmony restored. 🌟');
+            }
+        }, 1000);
+    }
+    
+    resetGame() {
+        this.chakras.forEach(chakra => {
+            chakra.matched = false;
+        });
+        this.score = 0;
+        this.balancedCount = 0;
+        this.selectedColor = null;
+        
+        this.createChakraWheel();
+        this.updateStats();
+        this.saveProgress();
+        
+        document.getElementById('chakra-description').textContent = 
+            'Click on a chakra segment to learn about it and match its color!';
+    }
+    
+    setupEventListeners() {
+        document.getElementById('reset-game').addEventListener('click', () => {
+            this.resetGame();
+        });
+        
+        document.getElementById('meditate-btn').addEventListener('click', () => {
+            if (this.balancedCount > 0) {
+                this.startChakraMeditation();
+            } else {
+                this.showAchievement('Balance at least one chakra first to unlock meditation! 🧘‍♀️');
+            }
+        });
+    }
+    
+    playSound(type) {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        if (type === 'success') {
+            oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+        } else {
+            oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        }
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.3);
+    }
+    
+    showAchievement(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'fixed top-4 right-4 bg-yellow-500 text-white p-4 rounded-lg shadow-lg z-50 slide-up';
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+    
+    saveProgress() {
+        const progress = {
+            chakras: this.chakras,
+            score: this.score,
+            balancedCount: this.balancedCount
+        };
+        localStorage.setItem('chakraBalanceProgress', JSON.stringify(progress));
+    }
+    
+    loadProgress() {
+        const saved = localStorage.getItem('chakraBalanceProgress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.chakras = progress.chakras || this.chakras;
+            this.score = progress.score || 0;
+            this.balancedCount = progress.balancedCount || 0;
+            
+            this.createChakraWheel();
+            this.updateStats();
+        }
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new ChakraBalanceGame();
+});
+</script>
+{% endblock %}

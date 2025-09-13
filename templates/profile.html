@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="container mx-auto px-6">
+        <div class="max-w-4xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <div class="flex items-center space-x-6">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <i data-lucide="user" class="w-12 h-12 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ session.student_name or 'User' }}</h1>
+                        <p class="text-gray-600 hindi-text">प्रोफ़ाइल पृष्ठ</p>
+                        <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold mt-2">
+                            Active User
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Form -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-6 flex items-center">
+                    <i data-lucide="edit-3" class="w-6 h-6 mr-3 text-blue-600"></i>
+                    Edit Profile
+                </h2>
+
+                <form method="POST" action="/profile" class="space-y-6">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                            <input 
+                                type="text" 
+                                name="name" 
+                                id="name" 
+                                value="{{ user.name if user else session.student_name }}" 
+                                required
+                                class="block w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                placeholder="Enter your full name"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                id="email" 
+                                value="{{ user.email if user else session.student_email }}" 
+                                required 
+                                readonly
+                                class="block w-full rounded-xl border border-gray-300 p-3 bg-gray-50 cursor-not-allowed"
+                            >
+                            <p class="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                            <input 
+                                type="tel" 
+                                name="phone" 
+                                id="phone" 
+                                value="{{ user.phone if user else '' }}"
+                                class="block w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                placeholder="+91 9876543210"
+                            >
+                        </div>
+
+                        <div>
+                            <label for="college" class="block text-sm font-medium text-gray-700 mb-2">College/Institution</label>
+                            <input 
+                                type="text" 
+                                name="college" 
+                                id="college" 
+                                value="{{ user.college if user else '' }}"
+                                class="block w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                placeholder="Your college name"
+                            >
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="bio" class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                        <textarea 
+                            name="bio" 
+                            id="bio" 
+                            rows="4" 
+                            class="block w-full rounded-xl border border-gray-300 p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            placeholder="Tell us something about yourself..."
+                        >{{ user.bio if user else '' }}</textarea>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+                        <a href="/" class="text-gray-600 hover:text-gray-800 flex items-center space-x-2">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Back to Dashboard</span>
+                        </a>
+                        <button 
+                            type="submit" 
+                            class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition duration-300 flex items-center space-x-2"
+                        >
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Account Stats -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mt-8">
+                <h2 class="text-2xl font-bold mb-6">Account Activity</h2>
+                <div class="grid md:grid-cols-3 gap-6 text-center">
+                    <div class="p-6 bg-blue-50 rounded-xl">
+                        <div class="text-3xl font-bold text-blue-600">{{ user.chat_sessions if user else 0 }}</div>
+                        <div class="text-sm text-gray-600">Chat Sessions</div>
+                    </div>
+                    <div class="p-6 bg-green-50 rounded-xl">
+                        <div class="text-3xl font-bold text-green-600">{{ user.assessments_taken if user else 0 }}</div>
+                        <div class="text-sm text-gray-600">Assessments</div>
+                    </div>
+                    <div class="p-6 bg-purple-50 rounded-xl">
+                        <div class="text-3xl font-bold text-purple-600">{{ user.days_active if user else 1 }}</div>
+                        <div class="text-sm text-gray-600">Days Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

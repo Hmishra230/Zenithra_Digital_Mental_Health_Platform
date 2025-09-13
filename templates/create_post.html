@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                Create New Post
+            </h1>
+            <p class="text-xl text-gray-600 hindi-text">
+                नई पोस्ट बनाएं - Share Your Experience
+            </p>
+            <p class="text-gray-600 mt-2">
+                Your post will be anonymous```hare your thoughts```fely with the```mmunity.
+            </p>
+        </div>
+
+        <!-- Guidelines Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <h3 class="text-lg font-semibold text-blue-800 mb-2 flex items-center">
+                <i data-lucide="info" class="w-5 h-5 mr-2"></i>
+                Community Guidelines
+            </h3>
+            <ul class="text-blue-700 text-sm space-y-1">
+                <li>• Be respectful an```upportive to```hers</li>
+                <li>• Your identity remains completely```onymous</li>```              <li>• For immediate```lp, contact```isis helpline: 1800-599-0019</li>
+                <li>• Avoid sharing```rsonal identifying```formation</li>```          </ul>
+        </div>
+
+        <form method="POST" action="/create_post```lass="bg-white rounded-xl shadow-lg p-8">
+            <!-- Post Title -->
+            <div class="mb-6">
+                <label for="title" class="block```xt-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="edit-3" class="w-5 h-5 mr-2 text-blue-600"></i>
+                    Post Title
+                    <span class="text-sm font-normal text-gray-500 ml-2 hindi-text">(शीर्षक)</span>
+                </label>
+                <input type="text" id="title```ame="title```equired 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                       placeholder="Briefly describe what```u want to discuss```"
+                       maxlength="200">
+                <div class="text-xs text-gray-500 mt-1">Maximum 200 characters</div>
+            </div>
+            
+            <!-- Post Content -->
+            <div class="mb-6">
+                <label for="content" class="```ck text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="file-text" class="w-5 h-5 mr-2 text-green-600"></i>
+                    Your Message
+                    <span class="text``` font-normal text-gray-500 ml-2 hindi-text">(संदेश)</span>
+                </label>
+                <textarea id="content"```me="content"```ws="8" required 
+                          class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none" 
+                          placeholder="Share your```oughts, experiences, or questions```emember, you're helping```hers by sharing your story```"></textarea>
+                <div class="text-xs text-gray-500 mt-1">Express yourself freely. Your anonymity is```otected.</div>```          </div>
+            
+            <!-- Category Selection -->
+            <div class="mb-6">
+                <label for="category" class```lock text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="tag" class="w-5 h-5 mr-2 text-purple-600"></i>
+                    Category
+                    <span class="text-sm font-normal text-gray-500 ml-2 hindi-text">(श्रेणी)</span>
+                </label>
+                <select id="category```ame="category```equired 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="">```ect a category...```ption>
+                    {% set categories = [
+                        ('General', 'General discussions and support'),
+                        ('Academic', 'Study stress, exams, academic pressure'),
+                        ('Social', 'Making friends, social anxiety, relationships'),
+                        ('Mental Health', 'Depression, anxiety, emotional wellbeing'),
+                        ('Career', 'Job stress, placements, career anxiety'),
+                        ('Relationships', 'Family issues, romantic relationships'),
+                        ('Campus Life', 'Hostel life, college experiences')
+                    ] %}
+                    {% for cat_value, cat_desc in categories %}
+                        <option value="{{ cat_value }}">{{ cat_value }} - {{ cat_desc }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Tags (Optional) -->
+            <div class="mb-8">
+                <label class="block text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="hash" class="w-5 h-5 mr-2 text-indigo-600"></i>
+                    Add Tags (Optional)
+                </label>
+                <div class="flex flex-wrap gap-2">
+                    {% set common_tags = ['stress', 'anxiety', 'depression', 'help', 'support', 'advice', 'lonely', 'exam', 'friendship', 'family'] %}
+                    {% for tag in common_tags %}
+                        <button type="button" class```ag-btn px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-blue-50 hover:border-blue-300 transition duration-200" 
+                                onclick="toggle```(this, '{{ tag }}')">
+                            {{ tag }}
+                        </button>
+                    {% endfor %}
+                </div>
+                <input type="hidden"```me="tags" i```selected-tags" value="">
+                <div class="text-xs text-gray-500 mt-2">Tags help others find relevant posts```iv>
+            </div>
+            
+            <!-- Anonymous Display -->
+            <div class="mb-8 bg-gray-50 p-4 rounded-lg">
+                <div class="flex items-center">
+                    <i data-lucide="user-x" class="w-5 h-5 text-gray-600 mr-3"></i>
+                    <div>
+                        <p class="font```mibold text-gray-700">Your post will appear as: Anonymous User</p>```                      <p class="text-sm text-gray-600">Your identity is completely protected</p>```                  </div>
+                </div>
+            </div>
+            
+            <!-- Submit Buttons -->
+            <div class="flex gap-4">
+                <button type="submit"```ass="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                    <i data-lucide="send" class="w-5 h-5 mr-2"></i>
+                    Publish Post
+                </button>
+                <a href="/forum" class="flex```bg-gray-600 hover:bg-gray-700 text-white font-bold py-4 px-6 rounded-lg transition duration-300 flex items-center justify-center">
+                    <i data-lucide="x" class="w-5 h-5 mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+        
+        <!-- Support Message -->
+        <div class="mt-8 text-center">
+            <p class="text-gray-600 text-sm hindi-text">
+                आपकी बात मायने रखती है।```झा करने के```ए धन्यवाद।<br>
+                Your voice matters. Thank you```r sharing with the```mmunity.
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleTag(button, tag) {
+    button.classList.toggle('bg-blue-100');
+    button.classList.toggle('border-blue-400');
+    button.classList.toggle('text-blue-800');
+    
+    // Update hidden input with selecte```ags
+    const selected = Array.from(document.querySelectorAll('.tag-btn.bg-blue-100'))
+                         .map(btn => btn.textContent.trim());
+    document.getElementById('selected-tags').value = selected.join(',');
+}
+
+// Character counter for title
+document.getElementById('title').addEventListener('input', function() {
+    const maxLength = 200;
+    const currentLength = this.value.length```   const remaining = maxLength - currentLength;
+    
+    // You can add a character counter display```re if needed
+});
+</script>
+{% endblock %}

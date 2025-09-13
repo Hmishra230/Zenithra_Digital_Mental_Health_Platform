@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen">
+    <!-- Hero Section -->
+    <div class="gradient-bg text-white py-20">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="fade-in">
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6 hindi-text">
+                        आपका मानसिक स्वास्थ्य:
+                        <br>हमारी प्राथमिकता है
+                    </h1>
+                    <h2 class="text-2xl md:text-3xl text-purple-100 mb-8">
+                        Your Mental Health: Our Priority
+                    </h2>
+                    <p class="text-lg text-purple-100 max-w-2xl mx-auto mb-10">
+                        A supportive digital community designed for students. Connect, explore resources, and find your calm.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Action Cards -->
+    <div class="container mx-auto px-4 -mt-10 relative z-10">
+        <div class="grid md:grid-cols-3 gap-6 mb-16">
+            <div class="slide-up">
+                <a href="{% if session.student_id %}/chat{% else %}/login{% endif %}" 
+                   class="block bg-gradient-to-br from-blue-500 to-blue-600 text-white p-8 rounded-2xl card-shadow hover:shadow-2xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-full mr-4">
+                            <i data-lucide="message-circle" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Start Chat</h3>
+                            <p class="text-blue-100 text-sm hindi-text">(चैट शुरू करें)</p>
+                        </div>
+                    </div>
+                    <p class="text-blue-100">
+                        Instant, confidential chat with AI therapist. Available 24/7 in Hindi & English.
+                    </p>
+                </a>
+            </div>
+
+            <div class="slide-up" style="animation-delay: 0.1s">
+                <a href="{% if session.student_id %}/screening{% else %}/login{% endif %}" 
+                   class="block bg-gradient-to-br from-teal-500 to-teal-600 text-white p-8 rounded-2xl card-shadow hover:shadow-2xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-full mr-4">
+                            <i data-lucide="clipboard-check" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Mental Health Check</h3>
+                            <p class="text-teal-100 text-sm">Assessment & Insights</p>
+                        </div>
+                    </div>
+                    <p class="text-teal-100">
+                        Monitor emotional patterns and gain insights into your mental well-being.
+                    </p>
+                </a>
+            </div>
+
+            <div class="slide-up" style="animation-delay: 0.2s">
+                <a href="{% if session.student_id %}/mood_tracker{% else %}/login{% endif %}" 
+                   class="block bg-gradient-to-br from-purple-500 to-purple-600 text-white p-8 rounded-2xl card-shadow hover:shadow-2xl transition duration-300 transform hover:-translate-y-2">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-white bg-opacity-20 p-3 rounded-full mr-4">
+                            <i data-lucide="heart" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold">Track Mood</h3>
+                            <p class="text-purple-100 text-sm hindi-text">(मूड ट्रैक करें)</p>
+                        </div>
+                    </div>
+                    <p class="text-purple-100">
+                        Daily mood tracking with personalized insights and wellness recommendations.
+                    </p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="bg-white rounded-2xl card-shadow p-8 mb-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="slide-up">
+                    <div class="text-4xl font-bold text-blue-600 mb-2">10K+</div>
+                    <div class="text-gray-700 font-semibold">Students Helped</div>
+                    <div class="text-sm text-gray-500 hindi-text">छात्रों की सहायता</div>
+                </div>
+                <div class="slide-up" style="animation-delay: 0.1s">
+                    <div class="text-4xl font-bold text-teal-600 mb-2">500+</div>
+                    <div class="text-gray-700 font-semibold">Chat Sessions</div>
+                    <div class="text-sm text-gray-500 hindi-text">चैट सत्र</div>
+                </div>
+                <div class="slide-up" style="animation-delay: 0.2s">
+                    <div class="text-4xl font-bold text-purple-600 mb-2">50+</div>
+                    <div class="text-gray-700 font-semibold">Expert Therapists</div>
+                    <div class="text-sm text-gray-500 hindi-text">विशेषज्ञ चिकित्सक</div>
+                </div>
+                <div class="slide-up" style="animation-delay: 0.3s">
+                    <div class="text-4xl font-bold text-orange-600 mb-2">24/7</div>
+                    <div class="text-gray-700 font-semibold">Support Available</div>
+                    <div class="text-sm text-gray-500 hindi-text">समर्थन उपलब्ध</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Cards -->
+        <div class="mb-16">
+            <h2 class="text-3xl font-bold text-center mb-4">Comprehensive Mental Health Services</h2>
+            <p class="text-gray-600 text-center mb-12">Everything you need for mental wellness in one place</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up">
+                    <div class="bg-gradient-to-br from-blue-100 to-blue-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="bot" class="w-8 h-8 text-blue-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">AI Chat Support</h3>
+                    <p class="text-gray-600 mb-4">Instant, confidential chat with AI therapist. मुझसे बात करें।</p>
+                    <div class="inline-block bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">POPULAR</div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up" style="animation-delay: 0.1s">
+                    <div class="bg-gradient-to-br from-orange-100 to-orange-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="trending-up" class="w-8 h-8 text-orange-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Mood Tracking</h3>
+                    <p class="text-gray-600 mb-4">Monitor emotional patterns and gain insights पैटर्न को समझें।</p>
+                    <div class="inline-block bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">NEW</div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up" style="animation-delay: 0.2s">
+                    <div class="bg-gradient-to-br from-purple-100 to-purple-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="user-check" class="w-8 h-8 text-purple-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Therapy Sessions</h3>
+                    <p class="text-gray-600 mb-4">Connect with licensed mental health professionals से जुड़ें।</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up" style="animation-delay: 0.3s">
+                    <div class="bg-gradient-to-br from-teal-100 to-teal-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="users" class="w-8 h-8 text-teal-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Peer Forums</h3>
+                    <p class="text-gray-600 mb-4">Share and connect in moderated peer support groups में शेयर करें।</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up" style="animation-delay: 0.4s">
+                    <div class="bg-gradient-to-br from-green-100 to-green-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="headphones" class="w-8 h-8 text-green-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Guided Meditations</h3>
+                    <p class="text-gray-600 mb-4">Audio sessions for calm आध्यात्म और सजावट देते हैं।</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl card-shadow hover:shadow-xl transition duration-300 slide-up" style="animation-delay: 0.5s">
+                    <div class="bg-gradient-to-br from-yellow-100 to-yellow-200 w-16 h-16 rounded-2xl flex items-center justify-center mb-4">
+                        <i data-lucide="book-open" class="w-8 h-8 text-yellow-600"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Wellness Courses</h3>
+                    <p class="text-gray-600 mb-4">Structured programs for mental well-being मानसिक स्वास्थ्य के लिए।</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom CTA -->
+    {% if not session.student_id %}
+    <div class="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Ready to start your wellness journey?</h2>
+            <p class="text-purple-100 mb-8 hindi-text">अपनी मानसिक स्वास्थ्य यात्रा शुरू करने के लिए तैयार हैं?</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/register" class="bg-white text-purple-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition duration-300">
+                    Get Started for Free
+                </a>
+                <a href="/login" class="border-2 border-white text-white px-8 py-3 rounded-lg font-bold hover:bg-white hover:text-purple-600 transition duration-300">
+                    Login
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-red-600 mb-4">🔴 Stress Ball Squeeze</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">तनाव मुक्त करें - Release your stress with virtual squeezing</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="stress-ball-container mb-8">
+                <div id="stress-ball" class="stress-ball" data-color="red">
+                    <div class="ball-highlight"></div>
+                    <div class="squeeze-effect"></div>
+                </div>
+            </div>
+            
+            <div class="controls mb-6">
+                <h3 class="text-lg font-semibold mb-4">Choose Your Stress Ball:</h3>
+                <div class="ball-selector grid grid-cols-3 md:grid-cols-6 gap-4">
+                    <button class="ball-option active" data-color="red" style="background: #EF4444;"></button>
+                    <button class="ball-option" data-color="blue" style="background: #3B82F6;"></button>
+                    <button class="ball-option locked" data-color="green" style="background: #10B981;"></button>
+                    <button class="ball-option locked" data-color="purple" style="background: #8B5CF6;"></button>
+                    <button class="ball-option locked" data-color="orange" style="background: #F97316;"></button>
+                    <button class="ball-option locked" data-color="rainbow" style="background: linear-gradient(45deg, red, orange, yellow, green, blue, purple);"></button>
+                </div>
+            </div>
+            
+            <div class="stats grid grid-cols-3 gap-4 text-center mb-6">
+                <div class="stat-item">
+                    <div id="squeeze-count" class="text-3xl font-bold text-red-600">0</div>
+                    <div class="text-sm text-gray-600">Squeezes</div>
+                </div>
+                <div class="stat-item">
+                    <div id="stress-level" class="text-3xl font-bold text-orange-600">100%</div>
+                    <div class="text-sm text-gray-600">Stress Level</div>
+                </div>
+                <div class="stat-item">
+                    <div id="balls-unlocked" class="text-3xl font-bold text-green-600">2</div>
+                    <div class="text-sm text-gray-600">Balls Unlocked</div>
+                </div>
+            </div>
+            
+            <div class="progress-bar mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Stress Relief Progress:</label>
+                <div class="w-full bg-gray-200 rounded-full h-4">
+                    <div id="progress-fill" class="bg-green-500 h-4 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+            
+            <div id="achievement-popup" class="achievement-popup hidden">
+                <div class="achievement-content">
+                    <h3>🎉 Achievement Unlocked!</h3>
+                    <p id="achievement-text"></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.stress-ball-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+}
+
+.stress-ball {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: #EF4444;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    user-select: none;
+}
+
+.ball-highlight {
+    position: absolute;
+    top: 20%;
+    left: 30%;
+    width: 30px;
+    height: 30px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    blur: 5px;
+}
+
+.squeeze-effect {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    pointer-events: none;
+}
+
+.stress-ball:active {
+    transform: scale(0.9);
+}
+
+.ball-option {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.ball-option.active {
+    border-color: #374151;
+    transform: scale(1.1);
+}
+
+.ball-option.locked {
+    opacity: 0.3;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.ball-option.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+}
+
+.achievement-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    z-index: 1000;
+    text-align: center;
+}
+
+.achievement-popup.show {
+    display: block;
+    animation: achievementPop 0.5s ease-out;
+}
+
+@keyframes achievementPop {
+    0% { transform: translate(-50%, -50%) scale(0); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes squeezeRipple {
+    0% { width: 0; height: 0; opacity: 1; }
+    100% { width: 300px; height: 300px; opacity: 0; }
+}
+
+.squeeze-ripple {
+    animation: squeezeRipple 0.6s ease-out;
+}
+</style>
+
+<script>
+class StressBallGame {
+    constructor() {
+        this.squeezeCount = 0;
+        this.stressLevel = 100;
+        this.ballsUnlocked = 2;
+        this.currentBall = 'red';
+        this.ballColors = {
+            red: '#EF4444',
+            blue: '#3B82F6',
+            green: '#10B981',
+            purple: '#8B5CF6',
+            orange: '#F97316',
+            rainbow: 'linear-gradient(45deg, red, orange, yellow, green, blue, purple)'
+        };
+        
+        this.initializeElements();
+        this.loadProgress();
+        this.setupEventListeners();
+        this.updateDisplay();
+    }
+    
+    initializeElements() {
+        this.stressBall = document.getElementById('stress-ball');
+        this.squeezeCountEl = document.getElementById('squeeze-count');
+        this.stressLevelEl = document.getElementById('stress-level');
+        this.ballsUnlockedEl = document.getElementById('balls-unlocked');
+        this.progressFill = document.getElementById('progress-fill');
+        this.achievementPopup = document.getElementById('achievement-popup');
+        this.achievementText = document.getElementById('achievement-text');
+        this.ballOptions = document.querySelectorAll('.ball-option');
+    }
+    
+    setupEventListeners() {
+        this.stressBall.addEventListener('click', (e) => this.squeezeBall(e));
+        this.stressBall.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.squeezeBall(e);
+        });
+        
+        this.ballOptions.forEach(option => {
+            option.addEventListener('click', () => this.selectBall(option));
+        });
+    }
+    
+    squeezeBall(e) {
+        this.squeezeCount++;
+        this.reduceStress();
+        this.createSqueezeEffect(e);
+        this.playSqueezeSound();
+        this.updateDisplay();
+        this.checkAchievements();
+        this.saveProgress();
+    }
+    
+    createSqueezeEffect(e) {
+        const effect = this.stressBall.querySelector('.squeeze-effect');
+        effect.classList.add('squeeze-ripple');
+        
+        setTimeout(() => {
+            effect.classList.remove('squeeze-ripple');
+        }, 600);
+    }
+    
+    reduceStress() {
+        const reduction = Math.random() * 3 + 1; // 1-4% reduction
+        this.stressLevel = Math.max(0, this.stressLevel - reduction);
+        
+        if (this.stressLevel <= 0) {
+            this.stressLevel = 100; // Reset for continuous play
+            this.showAchievement("Stress Completely Released! 🎉");
+        }
+    }
+    
+    playSqueezeSound() {
+        // Create simple audio feedback
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.1);
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    }
+    
+    selectBall(option) {
+        if (option.classList.contains('locked')) return;
+        
+        this.ballOptions.forEach(opt => opt.classList.remove('active'));
+        option.classList.add('active');
+        
+        this.currentBall = option.dataset.color;
+        this.stressBall.style.background = this.ballColors[this.currentBall];
+        this.stressBall.dataset.color = this.currentBall;
+    }
+    
+    checkAchievements() {
+        const milestones = [
+            { count: 25, ball: 'green', text: 'Green Ball Unlocked! 25 squeezes!' },
+            { count: 50, ball: 'purple', text: 'Purple Ball Unlocked! 50 squeezes!' },
+            { count: 100, ball: 'orange', text: 'Orange Ball Unlocked! 100 squeezes!' },
+            { count: 200, ball: 'rainbow', text: 'Rainbow Ball Unlocked! 200 squeezes!' }
+        ];
+        
+        milestones.forEach(milestone => {
+            if (this.squeezeCount >= milestone.count && this.ballsUnlocked < milestones.indexOf(milestone) + 3) {
+                this.unlockBall(milestone.ball);
+                this.showAchievement(milestone.text);
+                this.ballsUnlocked++;
+            }
+        });
+    }
+    
+    unlockBall(ballColor) {
+        const ballOption = document.querySelector(`[data-color="${ballColor}"]`);
+        if (ballOption) {
+            ballOption.classList.remove('locked');
+        }
+    }
+    
+    showAchievement(text) {
+        this.achievementText.textContent = text;
+        this.achievementPopup.classList.remove('hidden');
+        this.achievementPopup.classList.add('show');
+        
+        setTimeout(() => {
+            this.achievementPopup.classList.add('hidden');
+            this.achievementPopup.classList.remove('show');
+        }, 3000);
+    }
+    
+    updateDisplay() {
+        this.squeezeCountEl.textContent = this.squeezeCount;
+        this.stressLevelEl.textContent = Math.round(this.stressLevel) + '%';
+        this.ballsUnlockedEl.textContent = this.ballsUnlocked;
+        
+        const progress = Math.max(0, 100 - this.stressLevel);
+        this.progressFill.style.width = progress + '%';
+    }
+    
+    saveProgress() {
+        const progress = {
+            squeezeCount: this.squeezeCount,
+            stressLevel: this.stressLevel,
+            ballsUnlocked: this.ballsUnlocked,
+            currentBall: this.currentBall
+        };
+        localStorage.setItem('stressBallProgress', JSON.stringify(progress));
+    }
+    
+    loadProgress() {
+        const saved = localStorage.getItem('stressBallProgress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.squeezeCount = progress.squeezeCount || 0;
+            this.stressLevel = progress.stressLevel || 100;
+            this.ballsUnlocked = progress.ballsUnlocked || 2;
+            this.currentBall = progress.currentBall || 'red';
+            
+            // Unlock balls based on progress
+            if (this.ballsUnlocked > 2) {
+                const ballsToUnlock = ['green', 'purple', 'orange', 'rainbow'];
+                for (let i = 0; i < this.ballsUnlocked - 2; i++) {
+                    this.unlockBall(ballsToUnlock[i]);
+                }
+            }
+            
+            this.selectBall(document.querySelector(`[data-color="${this.currentBall}"]`));
+        }
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new StressBallGame();
+});
+</script>
+{% endblock %}

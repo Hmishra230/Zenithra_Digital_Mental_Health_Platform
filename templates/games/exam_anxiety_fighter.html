@@ -1,0 +1,1002 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-orange-600 mb-4">⚔️ Exam Anxiety Fighter</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">परीक्षा चिंता से लड़ें - Fight anxiety monsters with coping strategies</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="game-container mb-6">
+                <canvas id="anxiety-game" width="800" height="400" class="border-2 border-gray-300 rounded-lg mx-auto"></canvas>
+            </div>
+            
+            <div class="game-controls mb-6">
+                <button id="start-game" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg mr-4">
+                    Start Battle
+                </button>
+                <button id="pause-game" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg mr-4" disabled>
+                    Pause
+                </button>
+                <button id="restart-game" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
+                    Restart
+                </button>
+            </div>
+            
+            <div class="weapon-selection mb-6">
+                <h3 class="text-lg font-semibold mb-4">Coping Strategy Weapons:</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="weapon-btn active" data-weapon="breathing">
+                        🫁 Deep Breathing
+                    </button>
+                    <button class="weapon-btn" data-weapon="positive">
+                        💭 Positive Thinking
+                    </button>
+                    <button class="weapon-btn" data-weapon="exercise">
+                        🏃‍♂️ Physical Exercise
+                    </button>
+                    <button class="weapon-btn" data-weapon="meditation">
+                        🧘‍♀️ Meditation
+                    </button>
+                </div>
+            </div>
+            
+            <div class="game-stats grid grid-cols-4 gap-4 text-center">
+                <div>
+                    <div id="score" class="text-2xl font-bold text-orange-600">0</div>
+                    <div class="text-sm text-gray-600">Score</div>
+                </div>
+                <div>
+                    <div id="monsters-defeated" class="text-2xl font-bold text-green-600">0</div>
+                    <div class="text-sm text-gray-600">Defeated</div>
+                </div>
+                <div>
+                    <div id="health" class="text-2xl font-bold text-red-600">100</div>
+                    <div class="text-sm text-gray-600">Confidence</div>
+                </div>
+                <div>
+                    <div id="level" class="text-2xl font-bold text-purple-600">1</div>
+                    <div class="text-sm text-gray-600">Level</div>
+                </div>
+            </div>
+            
+            <div class="game-instructions mt-6 p-4 bg-gray-100 rounded-lg">
+                <p class="text-sm text-gray-700">
+                    <strong>Instructions:</strong> Move with WASD keys, press ENTER to attack anxiety monsters with coping strategies! 
+                    Different weapons are effective against different types of anxiety. Use number keys 1-4 to switch weapons quickly.
+                </p>
+                <div class="mt-2 p-3 bg-orange-50 rounded border-l-4 border-orange-500">
+                    <p class="text-xs text-orange-700">
+                        <strong>Controls:</strong> WASD = Move, ENTER = Shoot, 1-4 = Change Weapons, ESC = Exit Fullscreen
+                        <br><strong class="hindi-text">परीक्षा की चिंता को हराएं!</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Overlay -->
+<div class="fullscreen-overlay" id="fullscreen-overlay">
+    <button class="exit-fullscreen" id="exit-fullscreen">Exit Fullscreen (ESC)</button>
+    
+    <div class="fullscreen-ui">
+        <div class="fullscreen-stats">
+            <div>Score: <span id="fs-score">0</span></div>
+            <div>Defeated: <span id="fs-monsters">0</span></div>
+            <div>Health: <span id="fs-health">100</span></div>
+            <div>Level: <span id="fs-level">1</span></div>
+        </div>
+        
+        <div class="fullscreen-controls">
+            <button id="fs-pause" class="btn pause">Pause</button>
+            <button id="fs-restart" class="btn restart">Restart</button>
+        </div>
+    </div>
+    
+    <canvas id="fullscreen-game" class="fullscreen-game"></canvas>
+    
+    <div class="fullscreen-weapons">
+        <button class="fullscreen-weapon-btn active" data-weapon="breathing">🫁 Breathing (1)</button>
+        <button class="fullscreen-weapon-btn" data-weapon="positive">💭 Positive (2)</button>
+        <button class="fullscreen-weapon-btn" data-weapon="exercise">🏃‍♂️ Exercise (3)</button>
+        <button class="fullscreen-weapon-btn" data-weapon="meditation">🧘‍♀️ Meditation (4)</button>
+    </div>
+</div>
+
+<style>
+#anxiety-game {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    max-width: 100%;
+    height: auto;
+}
+
+.weapon-btn {
+    padding: 0.75rem;
+    border: 2px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.weapon-btn:hover {
+    border-color: #f97316;
+    background: #fef3c7;
+}
+
+.weapon-btn.active {
+    border-color: #f97316;
+    background: #f97316;
+    color: white;
+}
+
+.anxiety-monster {
+    animation: monsterFloat 2s ease-in-out infinite;
+}
+
+@keyframes monsterFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+.game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.5rem;
+}
+
+.game-over-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    text-align: center;
+}
+
+/* Fullscreen styles */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.fullscreen-overlay.active {
+    display: flex;
+}
+
+.fullscreen-game {
+    width: 95vw;
+    height: 70vh;
+    max-width: 1400px;
+    max-height: 800px;
+}
+
+.fullscreen-ui {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+.fullscreen-ui > div {
+    pointer-events: all;
+}
+
+.fullscreen-stats {
+    display: flex;
+    gap: 20px;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+    font-family: 'Arial', sans-serif;
+}
+
+.fullscreen-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    background: linear-gradient(45deg, #ff6b35, #f7931e);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn.pause {
+    background: linear-gradient(45deg, #fbbf24, #f59e0b);
+}
+
+.btn.restart {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+}
+
+.fullscreen-weapons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 1001;
+}
+
+.fullscreen-weapon-btn {
+    padding: 10px 15px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.fullscreen-weapon-btn.active {
+    border-color: #ff6b35;
+    background: rgba(255, 107, 53, 0.8);
+}
+
+.exit-fullscreen {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255, 0, 0, 0.8);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1002;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .fullscreen-stats {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .fullscreen-weapons {
+        flex-direction: column;
+        bottom: 10px;
+        width: 200px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .fullscreen-weapon-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+}
+</style>
+
+<script>
+class AnxietyFighterGame {
+    constructor() {
+        this.canvas = document.getElementById('anxiety-game');
+        this.ctx = this.canvas.getContext('2d');
+        this.fullscreenCanvas = document.getElementById('fullscreen-game');
+        this.fullscreenCtx = this.fullscreenCanvas.getContext('2d');
+        
+        this.isFullscreen = false;
+        this.currentCanvas = this.canvas;
+        this.currentCtx = this.ctx;
+        
+        // Game state
+        this.gameRunning = false;
+        this.gamePaused = false;
+        this.score = 0;
+        this.monstersDefeated = 0;
+        this.health = 100;
+        this.level = 1;
+        
+        // Player
+        this.player = {
+            x: 50,
+            y: 200,
+            width: 40,
+            height: 40,
+            speed: 8,
+            weapon: 'breathing'
+        };
+        
+        // Game objects
+        this.monsters = [];
+        this.projectiles = [];
+        this.powerups = [];
+        this.particles = [];
+        
+        // Input handling
+        this.keys = {};
+        this.lastShot = 0;
+        this.shotCooldown = 200; // milliseconds
+        
+        // Monster types
+        this.monsterTypes = [
+            { name: 'Test Anxiety', color: '#DC2626', weakness: 'breathing', speed: 2, health: 2, emoji: '😰' },
+            { name: 'Social Fear', color: '#7C3AED', weakness: 'positive', speed: 1.5, health: 3, emoji: '😨' },
+            { name: 'Performance Pressure', color: '#EA580C', weakness: 'meditation', speed: 2.5, health: 2, emoji: '😖' },
+            { name: 'Time Stress', color: '#059669', weakness: 'exercise', speed: 3, health: 1, emoji: '⏰' }
+        ];
+        
+        this.initializeGame();
+    }
+    
+    initializeGame() {
+        this.setupEventListeners();
+        this.setupFullscreen();
+        this.resizeCanvas();
+        this.draw();
+    }
+    
+    setupEventListeners() {
+        // Keyboard controls
+        window.addEventListener('keydown', (e) => {
+            this.keys[e.code] = true;
+            
+            // Handle weapon switching with numbers
+            if (e.code === 'Digit1') this.selectWeapon('breathing');
+            if (e.code === 'Digit2') this.selectWeapon('positive');
+            if (e.code === 'Digit3') this.selectWeapon('exercise');
+            if (e.code === 'Digit4') this.selectWeapon('meditation');
+            
+            // Handle Enter key for shooting
+            if (e.code === 'Enter' && this.gameRunning && !this.gamePaused) {
+                this.shootProjectile();
+            }
+            
+            // Handle Escape key
+            if (e.code === 'Escape') {
+                if (this.isFullscreen) {
+                    this.exitFullscreen();
+                }
+            }
+            
+            e.preventDefault();
+        });
+        
+        window.addEventListener('keyup', (e) => {
+            this.keys[e.code] = false;
+        });
+        
+        // Game controls
+        document.getElementById('start-game').addEventListener('click', () => this.startGame());
+        document.getElementById('pause-game').addEventListener('click', () => this.togglePause());
+        document.getElementById('restart-game').addEventListener('click', () => this.restartGame());
+        
+        // Fullscreen controls
+        document.getElementById('fs-pause').addEventListener('click', () => this.togglePause());
+        document.getElementById('fs-restart').addEventListener('click', () => this.restartGame());
+        document.getElementById('exit-fullscreen').addEventListener('click', () => this.exitFullscreen());
+        
+        // Weapon selection
+        document.querySelectorAll('.weapon-btn, .fullscreen-weapon-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.selectWeapon(btn.dataset.weapon));
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => this.resizeCanvas());
+    }
+    
+    setupFullscreen() {
+        // Make fullscreen canvas match current canvas size
+        this.fullscreenCanvas.width = 1400;
+        this.fullscreenCanvas.height = 800;
+    }
+    
+    enterFullscreen() {
+        this.isFullscreen = true;
+        this.currentCanvas = this.fullscreenCanvas;
+        this.currentCtx = this.fullscreenCtx;
+        
+        // Update canvas dimensions for fullscreen
+        const overlay = document.getElementById('fullscreen-overlay');
+        overlay.classList.add('active');
+        
+        // Scale player position for larger canvas
+        const scaleX = this.fullscreenCanvas.width / this.canvas.width;
+        const scaleY = this.fullscreenCanvas.height / this.canvas.height;
+        
+        this.player.x *= scaleX;
+        this.player.y *= scaleY;
+        this.player.width *= Math.min(scaleX, scaleY);
+        this.player.height *= Math.min(scaleX, scaleY);
+        this.player.speed *= Math.min(scaleX, scaleY);
+        
+        // Scale existing game objects
+        this.monsters.forEach(monster => {
+            monster.x *= scaleX;
+            monster.y *= scaleY;
+            monster.width *= Math.min(scaleX, scaleY);
+            monster.height *= Math.min(scaleX, scaleY);
+        });
+        
+        this.projectiles.forEach(projectile => {
+            projectile.x *= scaleX;
+            projectile.y *= scaleY;
+            projectile.width *= Math.min(scaleX, scaleY);
+            projectile.height *= Math.min(scaleX, scaleY);
+        });
+    }
+    
+    exitFullscreen() {
+        this.isFullscreen = false;
+        this.currentCanvas = this.canvas;
+        this.currentCtx = this.ctx;
+        
+        const overlay = document.getElementById('fullscreen-overlay');
+        overlay.classList.remove('active');
+        
+        // Scale back to normal canvas
+        const scaleX = this.canvas.width / this.fullscreenCanvas.width;
+        const scaleY = this.canvas.height / this.fullscreenCanvas.height;
+        
+        this.player.x *= scaleX;
+        this.player.y *= scaleY;
+        this.player.width *= Math.min(scaleX, scaleY);
+        this.player.height *= Math.min(scaleX, scaleY);
+        this.player.speed = 8; // Reset to original speed
+        
+        // Scale existing game objects
+        this.monsters.forEach(monster => {
+            monster.x *= scaleX;
+            monster.y *= scaleY;
+            monster.width *= Math.min(scaleX, scaleY);
+            monster.height *= Math.min(scaleX, scaleY);
+        });
+        
+        this.projectiles.forEach(projectile => {
+            projectile.x *= scaleX;
+            projectile.y *= scaleY;
+            projectile.width *= Math.min(scaleX, scaleY);
+            projectile.height *= Math.min(scaleX, scaleY);
+        });
+    }
+    
+    resizeCanvas() {
+        if (!this.isFullscreen) {
+            const container = this.canvas.parentElement;
+            const maxWidth = Math.min(800, container.clientWidth - 40);
+            this.canvas.style.width = maxWidth + 'px';
+            this.canvas.style.height = (maxWidth * 0.5) + 'px';
+        }
+    }
+    
+    selectWeapon(weapon) {
+        document.querySelectorAll('.weapon-btn, .fullscreen-weapon-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll(`[data-weapon="${weapon}"]`).forEach(btn => {
+            btn.classList.add('active');
+        });
+        this.player.weapon = weapon;
+    }
+    
+    startGame() {
+        if (!this.isFullscreen) {
+            this.enterFullscreen();
+        }
+        
+        this.gameRunning = true;
+        this.gamePaused = false;
+        this.resetGameState();
+        
+        document.getElementById('start-game').disabled = true;
+        document.getElementById('pause-game').disabled = false;
+        
+        this.spawnMonster();
+        this.gameLoop();
+    }
+    
+    resetGameState() {
+        this.score = 0;
+        this.monstersDefeated = 0;
+        this.health = 100;
+        this.level = 1;
+        this.monsters = [];
+        this.projectiles = [];
+        this.powerups = [];
+        this.particles = [];
+        
+        if (this.isFullscreen) {
+            this.player.x = 80;
+            this.player.y = 400;
+            this.player.width = 50;
+            this.player.height = 50;
+            this.player.speed = 12;
+        } else {
+            this.player.x = 50;
+            this.player.y = 200;
+            this.player.width = 40;
+            this.player.height = 40;
+            this.player.speed = 8;
+        }
+        
+        this.updateStats();
+    }
+    
+    togglePause() {
+        this.gamePaused = !this.gamePaused;
+        const pauseText = this.gamePaused ? 'Resume' : 'Pause';
+        document.getElementById('pause-game').textContent = pauseText;
+        document.getElementById('fs-pause').textContent = pauseText;
+    }
+    
+    restartGame() {
+        this.gameRunning = false;
+        this.gamePaused = false;
+        
+        document.getElementById('start-game').disabled = false;
+        document.getElementById('pause-game').disabled = true;
+        document.getElementById('pause-game').textContent = 'Pause';
+        document.getElementById('fs-pause').textContent = 'Pause';
+        
+        this.resetGameState();
+        this.draw();
+    }
+    
+    gameLoop() {
+        if (!this.gameRunning) return;
+        
+        if (!this.gamePaused) {
+            this.update();
+        }
+        
+        this.draw();
+        requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    update() {
+        this.updatePlayer();
+        this.updateMonsters();
+        this.updateProjectiles();
+        this.updateParticles();
+        this.checkCollisions();
+        this.spawnLogic();
+        this.updateLevel();
+    }
+    
+    updatePlayer() {
+        const speed = this.player.speed;
+        
+        // WASD movement
+        if (this.keys['KeyW'] && this.player.y > 0) {
+            this.player.y -= speed;
+        }
+        if (this.keys['KeyS'] && this.player.y < this.currentCanvas.height - this.player.height) {
+            this.player.y += speed;
+        }
+        if (this.keys['KeyA'] && this.player.x > 0) {
+            this.player.x -= speed;
+        }
+        if (this.keys['KeyD'] && this.player.x < this.currentCanvas.width * 0.4) {
+            this.player.x += speed;
+        }
+    }
+    
+    updateMonsters() {
+        this.monsters.forEach((monster, index) => {
+            monster.x -= monster.speed;
+            
+            // Remove if off screen
+            if (monster.x + monster.width < 0) {
+                this.monsters.splice(index, 1);
+                this.health -= 10;
+                this.updateStats();
+            }
+            
+            // Simple AI movement
+            if (Math.random() < 0.02) {
+                monster.y += (Math.random() - 0.5) * 30;
+            }
+            
+            // Keep in bounds
+            monster.y = Math.max(0, Math.min(this.currentCanvas.height - monster.height, monster.y));
+        });
+    }
+    
+    updateProjectiles() {
+        this.projectiles.forEach((projectile, index) => {
+            projectile.x += projectile.speed;
+            
+            // Remove if off screen
+            if (projectile.x > this.currentCanvas.width) {
+                this.projectiles.splice(index, 1);
+            }
+        });
+    }
+    
+    updateParticles() {
+        this.particles.forEach((particle, index) => {
+            particle.x += particle.vx;
+            particle.y += particle.vy;
+            particle.life -= 1;
+            
+            if (particle.life <= 0) {
+                this.particles.splice(index, 1);
+            }
+        });
+    }
+    
+    shootProjectile() {
+        const now = Date.now();
+        if (now - this.lastShot < this.shotCooldown) return;
+        
+        this.lastShot = now;
+        
+        const projectileSize = this.isFullscreen ? 12 : 8;
+        const projectileSpeed = this.isFullscreen ? 15 : 10;
+        
+        this.projectiles.push({
+            x: this.player.x + this.player.width,
+            y: this.player.y + this.player.height / 2 - projectileSize / 2,
+            speed: projectileSpeed,
+            weapon: this.player.weapon,
+            width: projectileSize,
+            height: projectileSize
+        });
+    }
+    
+    spawnMonster() {
+        if (!this.gameRunning) return;
+        
+        const monsterType = this.monsterTypes[Math.floor(Math.random() * this.monsterTypes.length)];
+        const monsterSize = this.isFullscreen ? 70 : 50;
+        
+        this.monsters.push({
+            x: this.currentCanvas.width,
+            y: Math.random() * (this.currentCanvas.height - monsterSize - 20) + 10,
+            width: monsterSize,
+            height: monsterSize,
+            speed: (monsterType.speed + (this.level * 0.3)) * (this.isFullscreen ? 1.5 : 1),
+            health: monsterType.health,
+            maxHealth: monsterType.health,
+            type: monsterType.name,
+            color: monsterType.color,
+            weakness: monsterType.weakness,
+            emoji: monsterType.emoji
+        });
+        
+        // Schedule next spawn
+        const spawnDelay = Math.max(300, 1500 - (this.level * 100));
+        setTimeout(() => this.spawnMonster(), spawnDelay);
+    }
+    
+    checkCollisions() {
+        // Projectile vs Monster collisions
+        this.projectiles.forEach((projectile, pIndex) => {
+            this.monsters.forEach((monster, mIndex) => {
+                if (this.isColliding(projectile, monster)) {
+                    // Calculate damage
+                    let damage = 1;
+                    if (projectile.weapon === monster.weakness) {
+                        damage = 2; // Double damage for correct weapon
+                        this.createParticles(monster.x + monster.width/2, monster.y + monster.height/2, '#FFD700', 15);
+                    } else {
+                        this.createParticles(monster.x + monster.width/2, monster.y + monster.height/2, '#FF6B6B', 8);
+                    }
+                    
+                    monster.health -= damage;
+                    this.projectiles.splice(pIndex, 1);
+                    
+                    if (monster.health <= 0) {
+                        this.monsters.splice(mIndex, 1);
+                        this.monstersDefeated++;
+                        this.score += projectile.weapon === monster.weakness ? 150 : 75;
+                        this.updateStats();
+                        
+                        // Big explosion for defeated monster
+                        this.createParticles(monster.x + monster.width/2, monster.y + monster.height/2, monster.color, 25);
+                    }
+                }
+            });
+        });
+        
+        // Player vs Monster collisions
+        this.monsters.forEach((monster, index) => {
+            if (this.isColliding(this.player, monster)) {
+                this.monsters.splice(index, 1);
+                this.health -= 15;
+                this.updateStats();
+                this.createParticles(this.player.x + this.player.width/2, this.player.y + this.player.height/2, '#FF0000', 20);
+                
+                if (this.health <= 0) {
+                    this.gameOver();
+                }
+            }
+        });
+    }
+    
+    isColliding(rect1, rect2) {
+        return rect1.x < rect2.x + rect2.width &&
+               rect1.x + rect1.width > rect2.x &&
+               rect1.y < rect2.y + rect2.height &&
+               rect1.y + rect1.height > rect2.y;
+    }
+    
+    createParticles(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x: x,
+                y: y,
+                vx: (Math.random() - 0.5) * 15,
+                vy: (Math.random() - 0.5) * 15,
+                color: color,
+                life: 40
+            });
+        }
+    }
+    
+    spawnLogic() {
+        // Spawn power-ups occasionally
+        if (Math.random() < 0.003) {
+            const powerupSize = this.isFullscreen ? 40 : 30;
+            this.powerups.push({
+                x: this.currentCanvas.width,
+                y: Math.random() * (this.currentCanvas.height - powerupSize),
+                width: powerupSize,
+                height: powerupSize,
+                type: 'health',
+                speed: 3
+            });
+        }
+    }
+    
+    updateLevel() {
+        const newLevel = Math.floor(this.monstersDefeated / 8) + 1;
+        if (newLevel > this.level) {
+            this.level = newLevel;
+            this.showLevelUp();
+        }
+    }
+    
+    showLevelUp() {
+        this.createParticles(this.currentCanvas.width / 2, this.currentCanvas.height / 2, '#FFD700', 50);
+    }
+    
+    gameOver() {
+        this.gameRunning = false;
+        
+        // Show game over screen
+        setTimeout(() => {
+            alert(`Game Over! 🎮\n\nYou defeated ${this.monstersDefeated} anxiety monsters!\nReached Level ${this.level}\nFinal Score: ${this.score}\n\nपरीक्षा की चिंता को हराने के लिए धन्यवाद!`);
+        }, 500);
+        
+        this.restartGame();
+        if (this.isFullscreen) {
+            this.exitFullscreen();
+        }
+    }
+    
+    draw() {
+        // Clear canvas
+        this.currentCtx.clearRect(0, 0, this.currentCanvas.width, this.currentCanvas.height);
+        
+        // Draw background
+        const gradient = this.currentCtx.createLinearGradient(0, 0, this.currentCanvas.width, this.currentCanvas.height);
+        gradient.addColorStop(0, '#fef3c7');
+        gradient.addColorStop(0.5, '#fde68a');
+        gradient.addColorStop(1, '#f59e0b');
+        this.currentCtx.fillStyle = gradient;
+        this.currentCtx.fillRect(0, 0, this.currentCanvas.width, this.currentCanvas.height);
+        
+        // Draw grid pattern for fullscreen
+        if (this.isFullscreen) {
+            this.currentCtx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            this.currentCtx.lineWidth = 1;
+            for (let x = 0; x < this.currentCanvas.width; x += 50) {
+                this.currentCtx.beginPath();
+                this.currentCtx.moveTo(x, 0);
+                this.currentCtx.lineTo(x, this.currentCanvas.height);
+                this.currentCtx.stroke();
+            }
+            for (let y = 0; y < this.currentCanvas.height; y += 50) {
+                this.currentCtx.beginPath();
+                this.currentCtx.moveTo(0, y);
+                this.currentCtx.lineTo(this.currentCanvas.width, y);
+                this.currentCtx.stroke();
+            }
+        }
+        
+        // Draw player
+        this.currentCtx.fillStyle = '#3B82F6';
+        this.currentCtx.fillRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        
+        // Draw player border
+        this.currentCtx.strokeStyle = '#1E40AF';
+        this.currentCtx.lineWidth = 2;
+        this.currentCtx.strokeRect(this.player.x, this.player.y, this.player.width, this.player.height);
+        
+        // Draw weapon indicator on player
+        this.currentCtx.fillStyle = '#FFFFFF';
+        this.currentCtx.font = this.isFullscreen ? '14px Arial' : '10px Arial';
+        this.currentCtx.textAlign = 'center';
+        this.currentCtx.fillText(
+            this.getWeaponEmoji(this.player.weapon), 
+            this.player.x + this.player.width/2, 
+            this.player.y + this.player.height/2 + 5
+        );
+        
+        // Draw monsters
+        this.monsters.forEach(monster => {
+            // Draw monster body
+            this.currentCtx.fillStyle = monster.color;
+            this.currentCtx.fillRect(monster.x, monster.y, monster.width, monster.height);
+            
+            // Draw monster border
+            this.currentCtx.strokeStyle = this.darkenColor(monster.color);
+            this.currentCtx.lineWidth = 2;
+            this.currentCtx.strokeRect(monster.x, monster.y, monster.width, monster.height);
+            
+            // Draw monster emoji
+            this.currentCtx.fillStyle = '#FFFFFF';
+            this.currentCtx.font = this.isFullscreen ? '24px Arial' : '16px Arial';
+            this.currentCtx.textAlign = 'center';
+            this.currentCtx.fillText(monster.emoji, monster.x + monster.width/2, monster.y + monster.height/2 + 8);
+            
+            // Draw health bar
+            const healthBarHeight = this.isFullscreen ? 8 : 5;
+            const healthBarY = monster.y - healthBarHeight - 5;
+            
+            this.currentCtx.fillStyle = '#FF0000';
+            this.currentCtx.fillRect(monster.x, healthBarY, monster.width, healthBarHeight);
+            this.currentCtx.fillStyle = '#00FF00';
+            this.currentCtx.fillRect(monster.x, healthBarY, (monster.health / monster.maxHealth) * monster.width, healthBarHeight);
+            
+            // Draw monster type
+            this.currentCtx.fillStyle = '#000000';
+            this.currentCtx.font = this.isFullscreen ? '12px Arial' : '8px Arial';
+            this.currentCtx.textAlign = 'center';
+            this.currentCtx.fillText(monster.type, monster.x + monster.width/2, monster.y + monster.height + 15);
+        });
+        
+        // Draw projectiles
+        this.projectiles.forEach(projectile => {
+            const weaponColor = this.getWeaponColor(projectile.weapon);
+            
+            // Draw projectile with glow effect
+            this.currentCtx.shadowColor = weaponColor;
+            this.currentCtx.shadowBlur = 10;
+            this.currentCtx.fillStyle = weaponColor;
+            this.currentCtx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
+            this.currentCtx.shadowBlur = 0;
+            
+            // Draw projectile center
+            this.currentCtx.fillStyle = '#FFFFFF';
+            this.currentCtx.fillRect(
+                projectile.x + projectile.width/4, 
+                projectile.y + projectile.height/4, 
+                projectile.width/2, 
+                projectile.height/2
+            );
+        });
+        
+        // Draw particles
+        this.particles.forEach(particle => {
+            this.currentCtx.fillStyle = particle.color;
+            this.currentCtx.globalAlpha = particle.life / 40;
+            const size = this.isFullscreen ? 6 : 4;
+            this.currentCtx.fillRect(particle.x - size/2, particle.y - size/2, size, size);
+            this.currentCtx.globalAlpha = 1;
+        });
+        
+        // Draw power-ups
+        this.powerups.forEach(powerup => {
+            this.currentCtx.fillStyle = '#00FF00';
+            this.currentCtx.fillRect(powerup.x, powerup.y, powerup.width, powerup.height);
+            
+            this.currentCtx.fillStyle = '#FFFFFF';
+            this.currentCtx.font = this.isFullscreen ? '20px Arial' : '14px Arial';
+            this.currentCtx.textAlign = 'center';
+            this.currentCtx.fillText('❤️', powerup.x + powerup.width/2, powerup.y + powerup.height/2 + 6);
+        });
+        
+        // Draw pause overlay
+        if (this.gamePaused) {
+            this.currentCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            this.currentCtx.fillRect(0, 0, this.currentCanvas.width, this.currentCanvas.height);
+            
+            this.currentCtx.fillStyle = '#FFFFFF';
+            this.currentCtx.font = this.isFullscreen ? '48px Arial' : '32px Arial';
+            this.currentCtx.textAlign = 'center';
+            this.currentCtx.fillText('PAUSED', this.currentCanvas.width / 2, this.currentCanvas.height / 2);
+            
+            this.currentCtx.font = this.isFullscreen ? '24px Arial' : '16px Arial';
+            this.currentCtx.fillText('Press Pause button to resume', this.currentCanvas.width / 2, this.currentCanvas.height / 2 + 50);
+            this.currentCtx.textAlign = 'start';
+        }
+        
+        // Reset text alignment
+        this.currentCtx.textAlign = 'start';
+    }
+    
+    getWeaponColor(weapon) {
+        const colors = {
+            breathing: '#3B82F6',
+            positive: '#EAB308',
+            exercise: '#EF4444',
+            meditation: '#8B5CF6'
+        };
+        return colors[weapon] || '#6B7280';
+    }
+    
+    getWeaponEmoji(weapon) {
+        const emojis = {
+            breathing: '🫁',
+            positive: '💭',
+            exercise: '🏃‍♂️',
+            meditation: '🧘‍♀️'
+        };
+        return emojis[weapon] || '⚔️';
+    }
+    
+    darkenColor(color) {
+        // Simple color darkening
+        const colors = {
+            '#DC2626': '#991B1B',
+            '#7C3AED': '#5B21B6',
+            '#EA580C': '#C2410C',
+            '#059669': '#047857'
+        };
+        return colors[color] || '#000000';
+    }
+    
+    updateStats() {
+        // Update regular stats
+        document.getElementById('score').textContent = this.score;
+        document.getElementById('monsters-defeated').textContent = this.monstersDefeated;
+        document.getElementById('health').textContent = this.health;
+        document.getElementById('level').textContent = this.level;
+        
+        // Update fullscreen stats
+        document.getElementById('fs-score').textContent = this.score;
+        document.getElementById('fs-monsters').textContent = this.monstersDefeated;
+        document.getElementById('fs-health').textContent = this.health;
+        document.getElementById('fs-level').textContent = this.level;
+        
+        // Update health color based on value
+        const healthColor = this.health > 60 ? '#10b981' : this.health > 30 ? '#f59e0b' : '#ef4444';
+        document.getElementById('health').style.color = healthColor;
+    }
+}
+
+// Initialize the game when page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new AnxietyFighterGame();
+});
+</script>
+{% endblock %}

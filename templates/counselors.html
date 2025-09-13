@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                Professional Counselors```          </h1>
+            <p class="text-xl text-gray-600 hindi-text">
+                व्यावसायिक परामर्शद``` - Here to Support You
+            </p>
+            <p class="text-gray-600 mt-2">
+                Connect with qualifie```ental health professionals who```derstand your journey```          </p>
+        </div>
+
+        {% if counselors %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for counselor in counselors %}
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 border border-gray-100">
+                        <div class="p```>
+                            <!-- Profile Image -->
+                            <div class="flex justify```nter mb-6">
+                                <img src```ttps://ui-avatars.com/api/?name={{ counselor.name | urlencode }}&background=random&size=120&bold=true" 
+                                     ```="{{ counselor.name }}" 
+                                     ```ss="rounded-full w-24 h-24 border-4 border-blue-100 shadow-md">
+                            </div>
+                            
+                            <!-- Counselor Info -->
+                            <div class="text-center mb-4">
+                                <h2 class="text-xl font-bold text-gray-800 mb-1">{{ counselor.name }}</h2>
+                                <p class```ext-blue-600 font-semibold mb-2">{{ counselor.designation }}</p>
+                                
+                                <!-- Rating -->
+                                <div class="flex```stify-center items-center mb-3">
+                                    <div```ass="flex text```llow-400">
+                                        ```for i in range(5) %}
+                                            <i```ta-lucide="star" class="w-4 h-4 {% if i < counselor.rating %}fill-current{% endif %}"></i>
+                                        {% endfor %}
+                                    ```iv>
+                                    <span```ass="ml-2 text-sm text-gray-600">{{ counselor.rating }}/5</span>
+                                </div>```                          </div>
+                            
+                            <!-- Specialization -->
+                            <div class="mb-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                    ```data-lucide="brain" class="w-4 h-4 mr-2 text-purple-600"></i>
+                                    ```cialization
+                                </h4>
+                                <p class="```t-gray-600 text-sm">{{ counselor.specialization }}</p>
+                            </div>
+                            
+                            <!-- Languages -->
+                            <div class="```4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                    ```data-lucide="message-circle" class="w-4 h-4 mr-2 text-green-600"></i>
+                                    Languages
+                                </h4>
+                                <p class="```t-gray-600 text-sm">{{ counselor.languages }}</p>
+                            </div>
+                            
+                            <!-- Contact Info -->
+                            <div class```pace-y-2 mb-4">
+                                <div class="flex items```nter text-sm text-gray-600">
+                                    <i data```cide="phone" class="w-4 h-4 mr-2 text-blue-600"></i>
+                                    ```an class="font```dium">{{ counselor.phone }}</span>
+                                </div>```                              <div```ass="flex items```nter text-sm text-gray-600">
+                                    ```data-lucide="mail" class="w-4 h-4 mr-2 text-blue-600"></i>
+                                    <span```ass="font-medium">{{ counselor.email }}</span>
+                                </div>```                              <div class="```x items-start text-sm text-gray-600">
+                                    <i data```cide="map-pin" class="w-4 h-4 mr-2 text-blue-600 mt-0.5"></i>
+                                    <span>```counselor.office_location }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Availability -->
+                            <div class="```6">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2 flex items-center">
+                                    <i data```cide="clock" class="w-4 h-4 mr-2 text-orange-600"></i>
+                                    Availability```                              </h```                                <p class```ext-gray-600 text-sm">{{ counselor.availability }}</p>
+                            </div>
+                            
+                            <!-- Caseload Status -->
+                            <div class="```6">
+                                <div class="flex```stify-between items-center text-sm">
+                                    ```an class="text-gray-600">Current Load:</span>
+                                    ```an class="font```mibold">{{ counselor.current_caseload }}/{{ counselor.max_capacity }}</span>
+                                </div```                               <div class="```ull bg-gray-200 rounded-full h-2 mt-2">
+                                    ```v class="bg-{% if counselor.current_caseload / counselor.max```pacity < 0.7 %}green{% elif counselor.current_caseload / counselor.```_capacity ```.9 %}yellow{% else %}red{% endif %}-500 h-2 rounded-full" 
+                                         ```le="width: {{ (counselor.current_caseload / counselor.```_capacity *```0) }}%"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class```pace-y-3">
+                                {% if counselor.is_available %}
+                                    ```tton class="```ull bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition duration-200 flex items-center justify-center">
+                                        ```data-lucide="calendar" class="w-4 h-4 mr-2"></i>
+                                        Schedule```pointment
+                                    </button>```                              {% else %}
+                                    <button```ass="w-full bg-gray-400 text-white py-2 px-4 rounded-lg font-medium cursor-not-allowed">
+                                        Currently```available
+                                    ```utton>
+                                {% endif %}
+                                
+                                <a href="```:{{ counselor.phone }}" class="w-full border border-blue-600 text-blue-600 hover:bg-blue-50 py-2 px-4 rounded-lg font-medium transition duration-200 flex items-center justify-center">
+                                    <i```ta-lucide="phone" class="w-4 h-4 mr-2"></i>
+                                    Call```w
+                                </a>```                          </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-16">
+                <i data-lucide="users" class="w-20 h-20 text-gray-400 mx-auto mb-6"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-4">No Counselors Available</h3>
+                <p class="text-gray-500 mb-6">We're working on bringing you qualifie```ental health professionals.```>
+                <a href="/chat" class="bg```ue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition duration-200">
+                    Try AI Chat Support```              </a>
+            </div>
+        {% endif %}
+
+        <!-- Emergency Contact Section -->
+        <div class="mt-12 bg-red-50 border border-red-200 rounded-xl p-6">
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-red-800 mb-3 flex items-center justify-center hindi-text">
+                    <i data-lucide="alert-triangle" class="w-6 h-6 mr-2"></i>
+                    Emergency Support```पातकालीन सहायता)
+                </h3>
+                <p class="text-red-700 mb-4">
+                    If you're in immediate danger or```ving thoughts``` self-harm, please contact emergency services immediately```               </p>
+                <div class="grid md:grid-cols-3 gap-4 text-sm">
+                    <div class="bg-white p-3 rounded-lg">
+                        <p class="font-semibold text-red-800">Emergency Services</p>
+                        <p class="text-red-600 font-bold">112</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg">
+                        <p class="font-semibold text-red-800">24/7 Crisis Helpline</p>
+                        <p class="text-red-600 font-bold">1800-599-0019</p>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg">
+                        <p class="font-semibold text-red-800">Campus Emergency</p>
+                        <p class="text-red-600 font-bold">9152987821</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

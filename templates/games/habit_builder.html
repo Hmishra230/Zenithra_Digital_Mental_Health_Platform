@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-purple-600 mb-4">📅 Habit Builder</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">आदत निर्माता - Level up by building healthy habits</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="character-display mb-8">
+                <div id="character" class="character-avatar">
+                    <div class="character-body">
+                        <div class="character-head"></div>
+                        <div class="character-torso"></div>
+                    </div>
+                    <div id="character-level" class="character-level">Level 1</div>
+                    <div id="character-xp-bar" class="xp-bar">
+                        <div id="xp-fill" class="xp-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="habits-container mb-8">
+                <h3 class="text-xl font-semibold mb-6">Daily Wellness Habits</h3>
+                <div class="habits-grid">
+                    <div class="habit-card" data-habit="exercise">
+                        <div class="habit-icon">🏃‍♂️</div>
+                        <div class="habit-name">Exercise</div>
+                        <div class="habit-xp">+20 XP</div>
+                        <button class="habit-complete-btn" data-habit="exercise">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                    
+                    <div class="habit-card" data-habit="meditate">
+                        <div class="habit-icon">🧘‍♀️</div>
+                        <div class="habit-name">Meditate</div>
+                        <div class="habit-xp">+15 XP</div>
+                        <button class="habit-complete-btn" data-habit="meditate">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                    
+                    <div class="habit-card" data-habit="read">
+                        <div class="habit-icon">📚</div>
+                        <div class="habit-name">Read</div>
+                        <div class="habit-xp">+10 XP</div>
+                        <button class="habit-complete-btn" data-habit="read">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                    
+                    <div class="habit-card" data-habit="sleep">
+                        <div class="habit-icon">😴</div>
+                        <div class="habit-name">Good Sleep</div>
+                        <div class="habit-xp">+25 XP</div>
+                        <button class="habit-complete-btn" data-habit="sleep">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                    
+                    <div class="habit-card" data-habit="hydrate">
+                        <div class="habit-icon">💧</div>
+                        <div class="habit-name">Stay Hydrated</div>
+                        <div class="habit-xp">+5 XP</div>
+                        <button class="habit-complete-btn" data-habit="hydrate">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                    
+                    <div class="habit-card" data-habit="socialize">
+                        <div class="habit-icon">👥</div>
+                        <div class="habit-name">Socialize</div>
+                        <div class="habit-xp">+12 XP</div>
+                        <button class="habit-complete-btn" data-habit="socialize">Complete</button>
+                        <div class="habit-streak">Streak: <span>0</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="achievements mb-6">
+                <h3 class="text-lg font-semibold mb-4">Achievements</h3>
+                <div id="achievements-list" class="achievements-grid">
+                    <!-- Achievements will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="progress-stats grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div id="total-xp" class="text-2xl font-bold text-purple-600">0</div>
+                    <div class="text-sm text-gray-600">Total XP</div>
+                </div>
+                <div>
+                    <div id="habits-completed-today" class="text-2xl font-bold text-green-600">0</div>
+                    <div class="text-sm text-gray-600">Completed Today</div>
+                </div>
+                <div>
+                    <div id="longest-streak" class="text-2xl font-bold text-orange-600">0</div>
+                    <div class="text-sm text-gray-600">Longest Streak</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.character-avatar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.character-body {
+    position: relative;
+    width: 100px;
+    height: 120px;
+}
+
+.character-head {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    margin: 0 auto 10px;
+    box-shadow: 0 4px 8px rgba(251, 191, 36, 0.3);
+}
+
+.character-torso {
+    width: 80px;
+    height: 60px;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-radius: 10px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(139, 92, 246, 0.3);
+}
+
+.character-level {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #7c3aed;
+    margin-top: 1rem;
+}
+
+.xp-bar {
+    width: 200px;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 5px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    border-radius: 5px;
+    transition: width 0.5s ease;
+}
+
+.habits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.habit-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.habit-card:hover {
+    border-color: #8b5cf6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.15);
+}
+
+.habit-card.completed {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+
+.habit-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.habit-name {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.habit-xp {
+    font-size: 0.875rem;
+    color: #8b5cf6;
+    margin-bottom: 1rem;
+}
+
+.habit-complete-btn {
+    background: #8b5cf6;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.habit-complete-btn:hover {
+    background: #7c3aed;
+}
+
+.habit-complete-btn:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+.habit-streak {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.achievement {
+    background: #fef3c7;
+    border: 2px solid #fbbf24;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.achievement.unlocked {
+    background: #dcfce7;
+    border-color: #22c55e;
+}
+
+@keyframes levelUp {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.level-up {
+    animation: levelUp 1s ease-in-out;
+}
+</style>
+
+<script>
+class HabitBuilder {
+    constructor() {
+        this.level = 1;
+        this.totalXP = 0;
+        this.xpToNextLevel = 100;
+        this.currentXP = 0;
+        
+        this.habits = {
+            exercise: { name: 'Exercise', xp: 20, streak: 0, completedToday: false },
+            meditate: { name: 'Meditate', xp: 15, streak: 0, completedToday: false },
+            read: { name: 'Read', xp: 10, streak: 0, completedToday: false },
+            sleep: { name: 'Good Sleep', xp: 25, streak: 0, completedToday: false },
+            hydrate: { name: 'Stay Hydrated', xp: 5, streak: 0, completedToday: false },
+            socialize: { name: 'Socialize', xp: 12, streak: 0, completedToday: false }
+        };
+        
+        this.achievements = [
+            { id: 'first_habit', name: 'First Step', description: 'Complete your first habit', unlocked: false },
+            { id: 'level_5', name: 'Growing Strong', description: 'Reach level 5', unlocked: false },
+            { id: 'week_streak', name: 'Consistent', description: '7-day streak on any habit', unlocked: false },
+            { id: 'all_habits_day', name: 'Perfect Day', description: 'Complete all habits in one day', unlocked: false },
+            { id: 'hundred_xp', name: 'Experience Seeker', description: 'Earn 100 XP in one day', unlocked: false },
+            { id: 'level_10', name: 'Habit Master', description: 'Reach level 10', unlocked: false }
+        ];
+        
+        this.initializeGame();
+        this.loadProgress();
+        this.updateDisplay();
+        this.checkDailyReset();
+    }
+    
+    initializeGame() {
+        this.setupEventListeners();
+        this.createAchievements();
+    }
+    
+    setupEventListeners() {
+        document.querySelectorAll('.habit-complete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const habitName = btn.dataset.habit;
+                this.completeHabit(habitName);
+            });
+        });
+    }
+    
+    completeHabit(habitName) {
+        const habit = this.habits[habitName];
+        
+        if (habit.completedToday) {
+            return; // Already completed today
+        }
+        
+        // Mark as completed
+        habit.completedToday = true;
+        habit.streak++;
+        
+        // Add XP
+        this.addXP(habit.xp);
+        
+        // Update UI
+        const card = document.querySelector(`[data-habit="${habitName}"]`);
+        card.classList.add('completed');
+        
+        const btn = card.querySelector('.habit-complete-btn');
+        btn.textContent = 'Completed!';
+        btn.disabled = true;
+        
+        // Update streak display
+        card.querySelector('.habit-streak span').textContent = habit.streak;
+        
+        // Check achievements
+        this.checkAchievements();
+        
+        // Update display
+        this.updateDisplay();
+        this.saveProgress();
+        
+        // Show completion effect
+        this.showCompletionEffect(card);
+    }
+    
+    addXP(amount) {
+        this.totalXP += amount;
+        this.currentXP += amount;
+        
+        // Check for level up
+        while (this.currentXP >= this.xpToNextLevel) {
+            this.currentXP -= this.xpToNextLevel;
+            this.level++;
+            this.xpToNextLevel = Math.floor(100 * Math.pow(1.5, this.level - 1));
+            this.showLevelUp();
+        }
+    }
+    
+    showLevelUp() {
+        const character = document.getElementById('character');
+        character.classList.add('level-up');
+        
+        setTimeout(() => {
+            character.classList.remove('level-up');
+        }, 1000);
+        
+        // Show level up message
+        this.showAchievementNotification(`🎉 Level Up! You are now level ${this.level}!`);
+    }
+    
+    showCompletionEffect(card) {
+        // Add sparkle effect
+        const sparkle = document.createElement('div');
+        sparkle.innerHTML = '✨';
+        sparkle.style.position = 'absolute';
+        sparkle.style.fontSize = '2rem';
+        sparkle.style.pointerEvents = 'none';
+        sparkle.style.animation = 'sparkleEffect 1s ease-out forwards';
+        
+        card.style.position = 'relative';
+        card.appendChild(sparkle);
+        
+        setTimeout(() => {
+            sparkle.remove();
+        }, 1000);
+    }
+    
+    checkAchievements() {
+        const completedToday = Object.values(this.habits).filter(h => h.completedToday).length;
+        const maxStreak = Math.max(...Object.values(this.habits).map(h => h.streak));
+        
+        // Check each achievement
+        if (!this.achievements[0].unlocked && completedToday >= 1) {
+            this.unlockAchievement('first_habit');
+        }
+        
+        if (!this.achievements[1].unlocked && this.level >= 5) {
+            this.unlockAchievement('level_5');
+        }
+        
+        if (!this.achievements[2].unlocked && maxStreak >= 7) {
+            this.unlockAchievement('week_streak');
+        }
+        
+        if (!this.achievements[3].unlocked && completedToday === Object.keys(this.habits).length) {
+            this.unlockAchievement('all_habits_day');
+        }
+        
+        if (!this.achievements[5].unlocked && this.level >= 10) {
+            this.unlockAchievement('level_10');
+        }
+    }
+    
+    unlockAchievement(achievementId) {
+        const achievement = this.achievements.find(a => a.id === achievementId);
+        if (achievement) {
+            achievement.unlocked = true;
+            this.showAchievementNotification(`🏆 Achievement Unlocked: ${achievement.name}!`);
+            this.updateAchievements();
+        }
+    }
+    
+    showAchievementNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-4 right-4 bg-purple-600 text-white p-4 rounded-lg shadow-lg z-50 slide-up';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 4000);
+    }
+    
+    createAchievements() {
+        const container = document.getElementById('achievements-list');
+        container.innerHTML = '';
+        
+        this.achievements.forEach(achievement => {
+            const div = document.createElement('div');
+            div.className = `achievement ${achievement.unlocked ? 'unlocked' : ''}`;
+            div.innerHTML = `
+                <div style="font-weight: 600;">${achievement.name}</div>
+                <div style="font-size: 0.75rem; margin-top: 0.25rem;">${achievement.description}</div>
+                <div style="margin-top: 0.5rem;">${achievement.unlocked ? '🏆' : '🔒'}</div>
+            `;
+            container.appendChild(div);
+        });
+    }
+    
+    updateAchievements() {
+        this.createAchievements();
+    }
+    
+    updateDisplay() {
+        // Update character level
+        document.getElementById('character-level').textContent = `Level ${this.level}`;
+        
+        // Update XP bar
+        const xpPercentage = (this.currentXP / this.xpToNextLevel) * 100;
+        document.getElementById('xp-fill').style.width = xpPercentage + '%';
+        
+        // Update stats
+        document.getElementById('total-xp').textContent = this.totalXP;
+        
+        const completedToday = Object.values(this.habits).filter(h => h.completedToday).length;
+        document.getElementById('habits-completed-today').textContent = completedToday;
+        
+        const longestStreak = Math.max(...Object.values(this.habits).map(h => h.streak));
+        document.getElementById('longest-streak').textContent = longestStreak;
+        
+        // Update habit streak displays
+        Object.keys(this.habits).forEach(habitName => {
+            const card = document.querySelector(`[data-habit="${habitName}"]`);
+            card.querySelector('.habit-streak span').textContent = this.habits[habitName].streak;
+            
+            if (this.habits[habitName].completedToday) {
+                card.classList.add('completed');
+                card.querySelector('.habit-complete-btn').textContent = 'Completed!';
+                card.querySelector('.habit-complete-btn').disabled = true;
+            }
+        });
+    }
+    
+    checkDailyReset() {
+        const today = new Date().toDateString();
+        const lastReset = localStorage.getItem('habitBuilderLastReset');
+        
+        if (lastReset !== today) {
+            // Reset daily completion status
+            Object.values(this.habits).forEach(habit => {
+                if (!habit.completedToday) {
+                    // Reset streak if habit wasn't completed yesterday
+                    habit.streak = 0;
+                }
+                habit.completedToday = false;
+            });
+            
+            localStorage.setItem('habitBuilderLastReset', today);
+            this.saveProgress();
+        }
+    }
+    
+    saveProgress() {
+        const progress = {
+            level: this.level,
+            totalXP: this.totalXP,
+            currentXP: this.currentXP,
+            xpToNextLevel: this.xpToNextLevel,
+            habits: this.habits,
+            achievements: this.achievements
+        };
+        localStorage.setItem('habitBuilderProgress', JSON.stringify(progress));
+    }
+    
+    loadProgress() {
+        const saved = localStorage.getItem('habitBuilderProgress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.level = progress.level || 1;
+            this.totalXP = progress.totalXP || 0;
+            this.currentXP = progress.currentXP || 0;
+            this.xpToNextLevel = progress.xpToNextLevel || 100;
+            
+            if (progress.habits) {
+                Object.keys(progress.habits).forEach(habitName => {
+                    if (this.habits[habitName]) {
+                        this.habits[habitName] = { ...this.habits[habitName], ...progress.habits[habitName] };
+                    }
+                });
+            }
+            
+            if (progress.achievements) {
+                this.achievements = progress.achievements;
+            }
+        }
+    }
+}
+
+// Add sparkle animation
+const style = document.createElement('style');
+style.textContent = `
+@keyframes sparkleEffect {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new HabitBuilder();
+});
+</script>
+{% endblock %}

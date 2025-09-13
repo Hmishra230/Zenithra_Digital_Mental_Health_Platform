@@ -1,0 +1,519 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-indigo-600 mb-4">🌤️ Mood Weather</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">मूड मौसम - Create weather patterns based on your emotions</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="weather-display mb-8">
+                <canvas id="weather-canvas" width="600" height="300" class="border-2 border-gray-200 rounded-lg mx-auto"></canvas>
+            </div>
+            
+            <div class="mood-selector mb-6">
+                <h3 class="text-lg font-semibold mb-4">How are you feeling today?</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="mood-btn" data-mood="happy" data-weather="sunny">
+                        😊 Happy<br><small>Sunny</small>
+                    </button>
+                    <button class="mood-btn" data-mood="calm" data-weather="clear">
+                        😌 Calm<br><small>Clear</small>
+                    </button>
+                    <button class="mood-btn" data-mood="sad" data-weather="rainy">
+                        😢 Sad<br><small>Rainy</small>
+                    </button>
+                    <button class="mood-btn" data-mood="angry" data-weather="stormy">
+                        😠 Angry<br><small>Stormy</small>
+                    </button>
+                    <button class="mood-btn" data-mood="anxious" data-weather="cloudy">
+                        😰 Anxious<br><small>Cloudy</small>
+                    </button>
+                    <button class="mood-btn" data-mood="excited" data-weather="windy">
+                        🤩 Excited<br><small>Windy</small>
+                    </button>
+                    <button class="mood-btn" data-mood="tired" data-weather="foggy">
+                        😴 Tired<br><small>Foggy</small>
+                    </button>
+                    <button class="mood-btn" data-mood="confused" data-weather="mixed">
+                        🤔 Confused<br><small>Mixed</small>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="weather-controls mb-6">
+                <button id="add-weather" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg mr-4">
+                    Add to Weather Pattern
+                </button>
+                <button id="clear-weather" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg mr-4">
+                    Clear Sky
+                </button>
+                <button id="animate-weather" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg">
+                    Animate Weather
+                </button>
+            </div>
+            
+            <div class="mood-history mb-6">
+                <h3 class="text-lg font-semibold mb-4">Your Emotional Climate (Last 7 Days)</h3>
+                <div id="climate-chart" class="h-32 bg-gray-100 rounded-lg flex items-end justify-center space-x-2 p-4">
+                    <!-- Climate bars will be generated here -->
+                </div>
+            </div>
+            
+            <div class="weather-insights p-4 bg-blue-50 rounded-lg">
+                <h4 class="font-semibold mb-2">Weather Insights:</h4>
+                <div id="weather-message" class="text-sm text-gray-700">
+                    Select your mood to see how it affects your personal weather pattern!
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.mood-btn {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.mood-btn:hover {
+    border-color: #6366f1;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.mood-btn.selected {
+    border-color: #6366f1;
+    background: #eef2ff;
+    border-width: 3px;
+}
+
+#weather-canvas {
+    max-width: 100%;
+    height: auto;
+    background: linear-gradient(to bottom, #87ceeb 0%, #98d8e8 100%);
+}
+
+.climate-bar {
+    width: 20px;
+    border-radius: 4px 4px 0 0;
+    margin: 0 2px;
+    position: relative;
+    transition: height 0.3s ease;
+}
+
+.climate-bar.happy { background: #fbbf24; }
+.climate-bar.calm { background: #60a5fa; }
+.climate-bar.sad { background: #6b7280; }
+.climate-bar.angry { background: #ef4444; }
+.climate-bar.anxious { background: #8b5cf6; }
+.climate-bar.excited { background: #10b981; }
+.climate-bar.tired { background: #374151; }
+.climate-bar.confused { background: linear-gradient(45deg, #fbbf24, #6b7280, #60a5fa); }
+
+@keyframes rainDrop {
+    0% { transform: translateY(-10px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateY(300px); opacity: 0; }
+}
+
+@keyframes lightning {
+    0%, 90%, 100% { opacity: 0; }
+    5%, 85% { opacity: 1; }
+}
+
+.rain-drop {
+    animation: rainDrop 1s linear infinite;
+}
+
+.lightning {
+    animation: lightning 2s ease-in-out infinite;
+}
+</style>
+
+<script>
+class MoodWeatherGame {
+    constructor() {
+        this.canvas = document.getElementById('weather-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.selectedMood = null;
+        this.selectedWeather = null;
+        this.weatherElements = [];
+        this.animationId = null;
+        this.moodHistory = JSON.parse(localStorage.getItem('moodWeatherHistory') || '[]');
+        
+        this.weatherPatterns = {
+            sunny: { color: '#FDE047', particles: 'sun' },
+            clear: { color: '#60A5FA', particles: 'none' },
+            rainy: { color: '#6B7280', particles: 'rain' },
+            stormy: { color: '#374151', particles: 'storm' },
+            cloudy: { color: '#9CA3AF', particles: 'clouds' },
+            windy: { color: '#34D399', particles: 'wind' },
+            foggy: { color: '#D1D5DB', particles: 'fog' },
+            mixed: { color: 'rainbow', particles: 'mixed' }
+        };
+        
+        this.initializeGame();
+        this.loadMoodHistory();
+        this.drawWeather();
+    }
+    
+    initializeGame() {
+        this.setupEventListeners();
+        this.resizeCanvas();
+        this.createClimateChart();
+    }
+    
+    setupEventListeners() {
+        // Mood selection
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                
+                this.selectedMood = btn.dataset.mood;
+                this.selectedWeather = btn.dataset.weather;
+                this.updateWeatherMessage();
+            });
+        });
+        
+        // Weather controls
+        document.getElementById('add-weather').addEventListener('click', () => {
+            if (this.selectedWeather) {
+                this.addWeatherElement();
+            }
+        });
+        
+        document.getElementById('clear-weather').addEventListener('click', () => {
+            this.clearWeather();
+        });
+        
+        document.getElementById('animate-weather').addEventListener('click', () => {
+            this.toggleAnimation();
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => this.resizeCanvas());
+    }
+    
+    resizeCanvas() {
+        const container = this.canvas.parentElement;
+        const maxWidth = Math.min(600, container.clientWidth - 40);
+        this.canvas.style.width = maxWidth + 'px';
+        this.canvas.style.height = (maxWidth * 0.5) + 'px';
+    }
+    
+    addWeatherElement() {
+        const pattern = this.weatherPatterns[this.selectedWeather];
+        
+        // Add to weather elements
+        this.weatherElements.push({
+            type: this.selectedWeather,
+            mood: this.selectedMood,
+            x: Math.random() * this.canvas.width,
+            y: Math.random() * this.canvas.height,
+            intensity: Math.random() * 0.5 + 0.5,
+            timestamp: Date.now()
+        });
+        
+        // Add to mood history
+        this.addToMoodHistory(this.selectedMood, this.selectedWeather);
+        
+        // Redraw
+        this.drawWeather();
+        this.updateWeatherMessage();
+        this.saveProgress();
+    }
+    
+    clearWeather() {
+        this.weatherElements = [];
+        this.drawWeather();
+        this.updateWeatherMessage();
+    }
+    
+    toggleAnimation() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+            this.animationId = null;
+            document.getElementById('animate-weather').textContent = 'Animate Weather';
+        } else {
+            this.startAnimation();
+            document.getElementById('animate-weather').textContent = 'Stop Animation';
+        }
+    }
+    
+    startAnimation() {
+        const animate = () => {
+            this.updateWeatherElements();
+            this.drawWeather();
+            this.animationId = requestAnimationFrame(animate);
+        };
+        animate();
+    }
+    
+    updateWeatherElements() {
+        this.weatherElements.forEach(element => {
+            // Move elements based on weather type
+            switch (element.type) {
+                case 'rainy':
+                    element.y += 2;
+                    if (element.y > this.canvas.height) element.y = -10;
+                    break;
+                case 'windy':
+                    element.x += 1;
+                    if (element.x > this.canvas.width) element.x = -10;
+                    break;
+                case 'cloudy':
+                    element.x += 0.5;
+                    element.y += Math.sin(Date.now() * 0.001) * 0.5;
+                    break;
+            }
+        });
+    }
+    
+    drawWeather() {
+        // Clear canvas with sky gradient
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#87CEEB');
+        gradient.addColorStop(1, '#E0F6FF');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw weather elements
+        this.weatherElements.forEach(element => {
+            this.drawWeatherElement(element);
+        });
+        
+        // Draw overall mood indicator
+        if (this.weatherElements.length > 0) {
+            this.drawMoodIndicator();
+        }
+    }
+    
+    drawWeatherElement(element) {
+        this.ctx.save();
+        this.ctx.globalAlpha = element.intensity;
+        
+        switch (element.type) {
+            case 'sunny':
+                this.drawSun(element.x, element.y);
+                break;
+            case 'rainy':
+                this.drawRain(element.x, element.y);
+                break;
+            case 'cloudy':
+                this.drawCloud(element.x, element.y);
+                break;
+            case 'stormy':
+                this.drawStorm(element.x, element.y);
+                break;
+            case 'windy':
+                this.drawWind(element.x, element.y);
+                break;
+            case 'foggy':
+                this.drawFog(element.x, element.y);
+                break;
+            case 'mixed':
+                this.drawMixed(element.x, element.y);
+                break;
+        }
+        
+        this.ctx.restore();
+    }
+    
+    drawSun(x, y) {
+        // Sun circle
+        this.ctx.fillStyle = '#FDE047';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 30, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Sun rays
+        this.ctx.strokeStyle = '#FDE047';
+        this.ctx.lineWidth = 3;
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + Math.cos(angle) * 35, y + Math.sin(angle) * 35);
+            this.ctx.lineTo(x + Math.cos(angle) * 45, y + Math.sin(angle) * 45);
+            this.ctx.stroke();
+        }
+    }
+    
+    drawRain(x, y) {
+        this.ctx.strokeStyle = '#6B7280';
+        this.ctx.lineWidth = 2;
+        for (let i = 0; i < 5; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + i * 5, y);
+            this.ctx.lineTo(x + i * 5, y + 20);
+            this.ctx.stroke();
+        }
+    }
+    
+    drawCloud(x, y) {
+        this.ctx.fillStyle = '#F3F4F6';
+        // Draw multiple circles to form cloud
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 20, 0, Math.PI * 2);
+        this.ctx.arc(x + 15, y, 25, 0, Math.PI * 2);
+        this.ctx.arc(x - 15, y, 15, 0, Math.PI * 2);
+        this.ctx.fill();
+    }
+    
+    drawStorm(x, y) {
+        // Dark cloud
+        this.ctx.fillStyle = '#374151';
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, 25, 0, Math.PI * 2);
+        this.ctx.fill();
+        
+        // Lightning
+        this.ctx.strokeStyle = '#FDE047';
+        this.ctx.lineWidth = 3;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x, y + 25);
+        this.ctx.lineTo(x - 10, y + 40);
+        this.ctx.lineTo(x + 5, y + 40);
+        this.ctx.lineTo(x - 5, y + 55);
+        this.ctx.stroke();
+    }
+    
+    drawWind(x, y) {
+        this.ctx.strokeStyle = '#34D399';
+        this.ctx.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x, y + i * 10);
+            this.ctx.quadraticCurveTo(x + 15, y + i * 10 - 5, x + 30, y + i * 10);
+            this.ctx.stroke();
+        }
+    }
+    
+    drawFog(x, y) {
+        this.ctx.fillStyle = 'rgba(209, 213, 219, 0.6)';
+        this.ctx.fillRect(x - 20, y - 10, 40, 20);
+    }
+    
+    drawMixed(x, y) {
+        // Draw multiple weather elements in one
+        this.ctx.save();
+        this.ctx.globalAlpha = 0.7;
+        this.drawSun(x - 15, y - 15);
+        this.drawCloud(x + 15, y - 10);
+        this.drawRain(x, y + 15);
+        this.ctx.restore();
+    }
+    
+    drawMoodIndicator() {
+        const moodCounts = this.getMoodCounts();
+        const dominantMood = Object.keys(moodCounts).reduce((a, b) => 
+            moodCounts[a] > moodCounts[b] ? a : b);
+        
+        // Draw mood indicator in corner
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.fillRect(10, 10, 120, 40);
+        
+        this.ctx.fillStyle = '#374151';
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText(`Overall Mood: ${dominantMood}`, 15, 30);
+        this.ctx.fillText(`Elements: ${this.weatherElements.length}`, 15, 45);
+    }
+    
+    getMoodCounts() {
+        const counts = {};
+        this.weatherElements.forEach(element => {
+            counts[element.mood] = (counts[element.mood] || 0) + 1;
+        });
+        return counts;
+    }
+    
+    addToMoodHistory(mood, weather) {
+        const today = new Date().toDateString();
+        const existingEntry = this.moodHistory.find(entry => entry.date === today);
+        
+        if (existingEntry) {
+            existingEntry.moods.push({ mood, weather, timestamp: Date.now() });
+        } else {
+            this.moodHistory.push({
+                date: today,
+                moods: [{ mood, weather, timestamp: Date.now() }]
+            });
+        }
+        
+        // Keep only last 7 days
+        this.moodHistory = this.moodHistory.slice(-7);
+        
+        this.createClimateChart();
+        this.saveProgress();
+    }
+    
+    createClimateChart() {
+        const chartContainer = document.getElementById('climate-chart');
+        chartContainer.innerHTML = '';
+        
+        this.moodHistory.slice(-7).forEach((day, index) => {
+            const bar = document.createElement('div');
+            bar.className = 'climate-bar';
+            
+            // Calculate dominant mood for the day
+            const moodCounts = {};
+            day.moods.forEach(m => {
+                moodCounts[m.mood] = (moodCounts[m.mood] || 0) + 1;
+            });
+            
+            const dominantMood = Object.keys(moodCounts).reduce((a, b) => 
+                moodCounts[a] > moodCounts[b] ? a : b, 'calm');
+            
+            bar.classList.add(dominantMood);
+            bar.style.height = (day.moods.length * 10 + 20) + 'px';
+            bar.title = `${day.date}: ${day.moods.length} mood entries`;
+            
+            chartContainer.appendChild(bar);
+        });
+    }
+    
+    updateWeatherMessage() {
+        const messages = {
+            sunny: 'The sun is shining bright! Your happiness creates warm, positive energy. ☀️',
+            clear: 'Clear skies ahead! Your calm state brings peace and clarity. 🌤️',
+            rainy: 'It\'s okay to have rainy days. Sadness helps us appreciate the sunshine. 🌧️',
+            stormy: 'Storms are powerful but temporary. Channel your anger into positive change. ⛈️',
+            cloudy: 'Cloudy thoughts will pass. Anxiety creates temporary overcast in your sky. ☁️',
+            windy: 'Your excitement creates energetic winds of change! Let it blow you forward. 💨',
+            foggy: 'Foggy moments need rest. Take time to recharge and find clarity. 🌫️',
+            mixed: 'Complex emotions create unique weather patterns. Embrace your complexity. 🌈'
+        };
+        
+        const message = this.selectedWeather ? messages[this.selectedWeather] : 
+            'Select your mood to see how it affects your personal weather pattern!';
+        
+        document.getElementById('weather-message').textContent = message;
+    }
+    
+    loadMoodHistory() {
+        this.createClimateChart();
+    }
+    
+    saveProgress() {
+        localStorage.setItem('moodWeatherHistory', JSON.stringify(this.moodHistory));
+        localStorage.setItem('moodWeatherElements', JSON.stringify(this.weatherElements));
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new MoodWeatherGame();
+});
+</script>
+{% endblock %}

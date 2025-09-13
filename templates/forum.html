@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+                Peer Support Forum
+            </h1>
+            <p class="text-xl text-gray-600 hindi-text">
+                सहकर्मी सहायता मंच - Connect, Share, Support
+            </p>
+            <p class="text-gray-600 mt-2">
+                A safe space for anonymous discussions with fellow students
+            </p>
+        </div>
+
+        <!-- Forum Controls -->
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex flex-wrap gap-4">
+                    <!-- Category Filter -->
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-2">Category:</label>
+                        <select onchange="filterCategory(this.value)" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <option value="">All Categories</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {% if cat == selected_category %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Sort Options -->
+                    <div class="flex items-center">
+                        <label class="text-sm font-medium text-gray-700 mr-2">Sort by:</label>
+                        <select onchange="sortPosts(this.value)" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                            <option value="recent" {% if sort_by == 'recent' %}selected{% endif %}>Most Recent</option>
+                            <option value="popular" {% if sort_by == 'popular' %}selected{% endif %}>Most Popular</option>
+                            <option value="resolved" {% if sort_by == 'resolved' %}selected{% endif %}>Resolved</option>
+                        </select>
+                    </div>
+                </div>
+                
+                {% if session.student_id %}
+                    <a href="/create_post" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition duration-200 font-medium flex items-center">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                        Create New Post
+                    </a>
+                {% else %}
+                    <div class="text-center">
+                        <p class="text-gray-600 text-sm mb-2">Want to participate?</p>
+                        <a href="/login" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                            Login to Post
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Forum Guidelines -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
+            <div class="flex items-start">
+                <i data-lucide="info" class="w-5 h-5 text-blue-600 mr-3 mt-0.5"></i>
+                <div>
+                    <h3 class="text-sm font-semibold text-blue-800 mb-1">Forum Guidelines</h3>
+                    <p class="text-blue-700 text-sm">
+                        This is a safe space for support. Be respectful, kind, and remember all posts are anonymous. 
+                        For immediate help, contact our crisis helpline: <strong>1800-599-0019</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Forum Posts -->
+        <div class="space-y-6">
+            {% for post in posts %}
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition duration-300 border border-gray-100">
+                    <div class="p-6">
+                        <!-- Post Header -->
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex-1">
+                                <!-- Pinned/Resolved Badges -->
+                                <div class="flex items-center mb-2">
+                                    {% if post.is_pinned %}
+                                        <span class="flex items-center bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full mr-2">
+                                            <i data-lucide="pin" class="w-3 h-3 mr-1"></i>
+                                            Pinned
+                                        </span>
+                                    {% endif %}
+                                    {% if post.is_resolved %}
+                                        <span class="flex items-center bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full mr-2">
+                                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
+                                            Resolved
+                                        </span>
+                                    {% endif %}
+                                    <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">{{ post.category }}</span>
+                                </div>
+                                
+                                <!-- Post Title -->
+                                <h3 class="text-xl font-bold text-gray-800 mb-3 hover:text-blue-600 transition duration-200">
+                                    <a href="/forum/post/{{ post.id }}" class="line-clamp-2">{{ post.title }}</a>
+                                </h3>
+                                
+                                <!-- Post Preview -->
+                                <p class="text-gray-600 mb-4 line-clamp-3">{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+                                
+                                <!-- Post Meta -->
+                                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                                    <span class="flex items-center">
+                                        <i data-lucide="user" class="w-4 h-4 mr-1"></i>
+                                        {{ post.anonymous_id }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i data-lucide="calendar" class="w-4 h-4 mr-1"></i>
+                                        {{ post.created_at.strftime('%B %d, %Y') }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i data-lucide="clock" class="w-4 h-4 mr-1"></i>
+                                        {{ post.created_at.strftime('%I:%M %p') }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i data-lucide="eye" class="w-4 h-4 mr-1"></i>
+                                        {{ post.views }} views
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i data-lucide="heart" class="w-4 h-4 mr-1"></i>
+                                        {{ post.likes }}
+                                    </span>
+                                    <span class="flex items-center">
+                                        <i data-lucide="message-circle" class="w-4 h-4 mr-1"></i>
+                                        {{ post.replies|length }} replies
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Button -->
+                            <div class="ml-6">
+                                <a href="/forum/post/{{ post.id }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition duration-200 flex items-center">
+                                    <i data-lucide="message-circle" class="w-4 h-4 mr-2"></i>
+                                    Join Discussion
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Quick Preview of Recent Replies -->
+                        {% if post.replies and post.replies|length > 0 %}
+                            <div class="border-t pt-4 mt-4">
+                                <p class="text-sm text-gray-600 mb-2">
+                                    <i data-lucide="message-square" class="w-3 h-3 inline mr-1"></i>
+                                    Latest reply from <strong>{{ post.replies[-1].anonymous_id }}</strong>:
+                                </p>
+                                <p class="text-sm text-gray-700 italic">
+                                    "{{ post.replies[-1].content[:100] }}{% if post.replies[-1].content|length > 100 %}...{% endif %}"
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Empty State -->
+        {% if not posts %}
+            <div class="text-center py-16">
+                <i data-lucide="message-circle" class="w-20 h-20 text-gray-400 mx-auto mb-6"></i>
+                <h3 class="text-2xl font-semibold text-gray-600 mb-4">
+                    {% if selected_category %}No posts in {{ selected_category }}{% else %}No Posts Yet{% endif %}
+                </h3>
+                <p class="text-gray-500 mb-6">
+                    {% if selected_category %}
+                        Try selecting a different category or be the first to start a discussion in {{ selected_category }}.
+                    {% else %}
+                        Be the first to start a meaningful conversation and support your fellow students.
+                    {% endif %}
+                </p>
+                {% if session.student_id %}
+                    <a href="/create_post" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition duration-200 inline-flex items-center">
+                        <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                        Create First Post
+                    </a>
+                {% else %}
+                    <a href="/login" class="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium transition duration-200">
+                        Login to Create Post
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Forum Stats (FIXED VERSION) -->
+        <div class="mt-12 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center hindi-text">
+                Community Impact (समुदायिक प्रभाव)
+            </h3>
+            <div class="grid md:grid-cols-4 gap-6 text-center">
+                <div>
+                    <div class="text-3xl font-bold text-purple-600">{{ posts|length }}</div>
+                    <p class="text-gray-600 font-medium">Total Posts</p>
+                    <p class="text-xs text-gray-500 hindi-text">कुल पोस्ट</p>
+                </div>
+                <div>
+                    <!-- ✅ FIXED: Calculate total replies correctly -->
+                    {% set total_replies = namespace(count=0) %}
+                    {% for post in posts %}
+                        {% set total_replies.count = total_replies.count + (post.replies|length) %}
+                    {% endfor %}
+                    <div class="text-3xl font-bold text-blue-600">{{ total_replies.count }}</div>
+                    <p class="text-gray-600 font-medium">Total Replies</p>
+                    <p class="text-xs text-gray-500 hindi-text">कुल उत्तर</p>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-green-600">{{ posts|selectattr('is_resolved')|list|length }}</div>
+                    <p class="text-gray-600 font-medium">Resolved</p>
+                    <p class="text-xs text-gray-500 hindi-text">हल किए गए</p>
+                </div>
+                <div>
+                    <!-- ✅ FIXED: Handle views safely -->
+                    {% set total_views = namespace(count=0) %}
+                    {% for post in posts %}
+                        {% set total_views.count = total_views.count + (post.views or 0) %}
+                    {% endfor %}
+                    <div class="text-3xl font-bold text-orange-600">{{ total_views.count }}</div>
+                    <p class="text-gray-600 font-medium">Total Views</p>
+                    <p class="text-xs text-gray-500 hindi-text">कुल दृश्य</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterCategory(category) {
+    const url = new URL(window.location);
+    if (category) {
+        url.searchParams.set('category', category);
+    } else {
+        url.searchParams.delete('category');
+    }
+    window.location = url;
+}
+
+function sortPosts(sort) {
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sort);
+    window.location = url;
+}
+</script>
+{% endblock %}

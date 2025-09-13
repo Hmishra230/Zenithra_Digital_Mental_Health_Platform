@@ -1,0 +1,478 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-gray-600 mb-4">🕵️ Emotion Detective</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">भावना जासूस - Identify emotional triggers through pattern recognition</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="game-area mb-6">
+                <canvas id="emotion-canvas" width="600" height="300" class="border-2 border-gray-300 rounded-lg mx-auto mb-6"></canvas>
+                
+                <div id="emotion-prompt" class="text-lg font-semibold mb-4">
+                    Click "Start Detection" to begin identifying emotional patterns!
+                </div>
+                
+                <div class="emotion-options mb-6 hidden" id="emotion-options">
+                    <h3 class="text-lg font-semibold mb-4">What emotion does this pattern represent?</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <button class="emotion-btn" data-emotion="happy">
+                            😊 Happy
+                        </button>
+                        <button class="emotion-btn" data-emotion="sad">
+                            😢 Sad
+                        </button>
+                        <button class="emotion-btn" data-emotion="angry">
+                            😠 Angry
+                        </button>
+                        <button class="emotion-btn" data-emotion="anxious">
+                            😰 Anxious
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="game-controls mb-6">
+                    <button id="start-detection" class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg mr-4">
+                        Start Detection
+                    </button>
+                    <button id="next-pattern" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg mr-4 hidden">
+                        Next Pattern
+                    </button>
+                    <button id="reset-game" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg">
+                        Reset Game
+                    </button>
+                </div>
+            </div>
+            
+            <div class="detective-stats grid grid-cols-3 gap-4 text-center mb-6">
+                <div>
+                    <div id="correct-detections" class="text-2xl font-bold text-green-600">0</div>
+                    <div class="text-sm text-gray-600">Correct</div>
+                </div>
+                <div>
+                    <div id="total-attempts" class="text-2xl font-bold text-blue-600">0</div>
+                    <div class="text-sm text-gray-600">Total</div>
+                </div>
+                <div>
+                    <div id="accuracy-rate" class="text-2xl font-bold text-purple-600">0%</div>
+                    <div class="text-sm text-gray-600">Accuracy</div>
+                </div>
+            </div>
+            
+            <div class="learning-insights p-4 bg-gray-50 rounded-lg">
+                <h4 class="font-semibold mb-2">🧠 Learning Insights:</h4>
+                <div id="insight-text" class="text-sm text-gray-700">
+                    Recognizing emotional patterns helps you identify triggers in real-life situations.
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+#emotion-canvas {
+    max-width: 100%;
+    height: auto;
+    background: #f9fafb;
+}
+
+.emotion-btn {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.emotion-btn:hover {
+    border-color: #6b7280;
+    background: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.emotion-btn.correct {
+    border-color: #10b981;
+    background: #d1fae5;
+    animation: correctPulse 0.5s ease;
+}
+
+.emotion-btn.incorrect {
+    border-color: #ef4444;
+    background: #fee2e2;
+    animation: shake 0.5s ease;
+}
+
+@keyframes correctPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.pattern-animation {
+    animation: patternFade 2s ease-in-out;
+}
+
+@keyframes patternFade {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+</style>
+
+<script>
+class EmotionDetective {
+    constructor() {
+        this.canvas = document.getElementById('emotion-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.gameActive = false;
+        this.currentEmotion = null;
+        this.correctDetections = 0;
+        this.totalAttempts = 0;
+        
+        this.emotionPatterns = {
+            happy: {
+                shape: 'circle',
+                color: '#fbbf24',
+                pattern: 'smooth',
+                description: 'Bright, smooth, circular patterns often represent joy and happiness'
+            },
+            sad: {
+                shape: 'drops',
+                color: '#3b82f6',
+                pattern: 'downward',
+                description: 'Downward-flowing patterns typically indicate sadness or depression'
+            },
+            angry: {
+                shape: 'jagged',
+                color: '#ef4444',
+                pattern: 'sharp',
+                description: 'Sharp, jagged patterns usually represent anger or frustration'
+            },
+            anxious: {
+                shape: 'chaotic',
+                color: '#8b5cf6',
+                pattern: 'irregular',
+                description: 'Irregular, chaotic patterns often indicate anxiety or worry'
+            }
+        };
+        
+        this.insights = [
+            'Recognizing emotional patterns helps you identify triggers in real-life situations.',
+            'Visual patterns can mirror internal emotional states and help with self-awareness.',
+            'Practice identifying emotions in abstract forms to improve emotional intelligence.',
+            'Understanding your emotional patterns is the first step to managing them effectively.',
+            'Different emotions have characteristic visual signatures that we can learn to recognize.'
+        ];
+        
+        this.initializeGame();
+        this.loadProgress();
+    }
+    
+    initializeGame() {
+        this.setupEventListeners();
+        this.resizeCanvas();
+        this.updateStats();
+        this.drawInstructions();
+    }
+    
+    setupEventListeners() {
+        document.getElementById('start-detection').addEventListener('click', () => {
+            this.startGame();
+        });
+        
+        document.getElementById('next-pattern').addEventListener('click', () => {
+            this.nextPattern();
+        });
+        
+        document.getElementById('reset-game').addEventListener('click', () => {
+            this.resetGame();
+        });
+        
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.selectEmotion(btn.dataset.emotion);
+            });
+        });
+        
+        window.addEventListener('resize', () => this.resizeCanvas());
+    }
+    
+    resizeCanvas() {
+        const container = this.canvas.parentElement;
+        const maxWidth = Math.min(600, container.clientWidth - 40);
+        this.canvas.style.width = maxWidth + 'px';
+        this.canvas.style.height = (maxWidth * 0.5) + 'px';
+    }
+    
+    startGame() {
+        this.gameActive = true;
+        document.getElementById('start-detection').style.display = 'none';
+        document.getElementById('emotion-options').classList.remove('hidden');
+        document.getElementById('next-pattern').classList.remove('hidden');
+        
+        this.generatePattern();
+    }
+    
+    generatePattern() {
+        const emotions = Object.keys(this.emotionPatterns);
+        this.currentEmotion = emotions[Math.floor(Math.random() * emotions.length)];
+        
+        document.getElementById('emotion-prompt').textContent = 
+            'Analyze the emotional pattern and select the corresponding emotion below:';
+        
+        this.drawPattern(this.currentEmotion);
+        this.resetButtons();
+    }
+    
+    drawPattern(emotion) {
+        const pattern = this.emotionPatterns[emotion];
+        this.clearCanvas();
+        
+        this.ctx.fillStyle = pattern.color;
+        this.ctx.strokeStyle = pattern.color;
+        this.ctx.lineWidth = 3;
+        
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        
+        switch (pattern.shape) {
+            case 'circle':
+                this.drawHappyPattern(centerX, centerY);
+                break;
+            case 'drops':
+                this.drawSadPattern(centerX, centerY);
+                break;
+            case 'jagged':
+                this.drawAngryPattern(centerX, centerY);
+                break;
+            case 'chaotic':
+                this.drawAnxiousPattern(centerX, centerY);
+                break;
+        }
+    }
+    
+    drawHappyPattern(x, y) {
+        // Happy - concentric circles with rays
+        for (let i = 1; i <= 3; i++) {
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, i * 30, 0, Math.PI * 2);
+            this.ctx.stroke();
+        }
+        
+        // Sun rays
+        for (let i = 0; i < 8; i++) {
+            const angle = (i / 8) * Math.PI * 2;
+            const x1 = x + Math.cos(angle) * 100;
+            const y1 = y + Math.sin(angle) * 100;
+            const x2 = x + Math.cos(angle) * 120;
+            const y2 = y + Math.sin(angle) * 120;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(x1, y1);
+            this.ctx.lineTo(x2, y2);
+            this.ctx.stroke();
+        }
+    }
+    
+    drawSadPattern(x, y) {
+        // Sad - downward flowing drops
+        for (let i = 0; i < 5; i++) {
+            const dropX = x - 60 + i * 30;
+            const dropY = y - 50;
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(dropX, dropY);
+            this.ctx.quadraticCurveTo(dropX - 10, dropY + 30, dropX, dropY + 60);
+            this.ctx.quadraticCurveTo(dropX + 10, dropY + 30, dropX, dropY);
+            this.ctx.fill();
+        }
+    }
+    
+    drawAngryPattern(x, y) {
+        // Angry - jagged lightning-like patterns
+        this.ctx.beginPath();
+        this.ctx.moveTo(x - 80, y);
+        this.ctx.lineTo(x - 40, y - 40);
+        this.ctx.lineTo(x - 20, y + 20);
+        this.ctx.lineTo(x + 20, y - 30);
+        this.ctx.lineTo(x + 40, y + 30);
+        this.ctx.lineTo(x + 80, y);
+        this.ctx.stroke();
+        
+        // Sharp triangular spikes
+        for (let i = -2; i <= 2; i++) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(x + i * 40, y + 40);
+            this.ctx.lineTo(x + i * 40 - 15, y + 70);
+            this.ctx.lineTo(x + i * 40 + 15, y + 70);
+            this.ctx.fill();
+        }
+    }
+    
+    drawAnxiousPattern(x, y) {
+        // Anxious - chaotic, irregular squiggles
+        for (let i = 0; i < 8; i++) {
+            this.ctx.beginPath();
+            let currentX = x - 100 + Math.random() * 200;
+            let currentY = y - 50 + Math.random() * 100;
+            this.ctx.moveTo(currentX, currentY);
+            
+            for (let j = 0; j < 10; j++) {
+                currentX += (Math.random() - 0.5) * 20;
+                currentY += (Math.random() - 0.5) * 20;
+                this.ctx.lineTo(currentX, currentY);
+            }
+            this.ctx.stroke();
+        }
+    }
+    
+    selectEmotion(selectedEmotion) {
+        if (!this.gameActive || !this.currentEmotion) return;
+        
+        this.totalAttempts++;
+        const isCorrect = selectedEmotion === this.currentEmotion;
+        
+        if (isCorrect) {
+            this.correctDetections++;
+            this.showFeedback(selectedEmotion, true);
+        } else {
+            this.showFeedback(selectedEmotion, false);
+        }
+        
+        this.updateStats();
+        this.updateInsights();
+        this.saveProgress();
+        
+        // Disable buttons temporarily
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.disabled = true;
+        });
+        
+        setTimeout(() => {
+            document.querySelectorAll('.emotion-btn').forEach(btn => {
+                btn.disabled = false;
+            });
+        }, 2000);
+    }
+    
+    showFeedback(selectedEmotion, isCorrect) {
+        const selectedBtn = document.querySelector(`[data-emotion="${selectedEmotion}"]`);
+        const correctBtn = document.querySelector(`[data-emotion="${this.currentEmotion}"]`);
+        
+        if (isCorrect) {
+            selectedBtn.classList.add('correct');
+            document.getElementById('emotion-prompt').innerHTML = 
+                `✅ Correct! You identified <strong>${this.currentEmotion}</strong> emotion pattern!`;
+        } else {
+            selectedBtn.classList.add('incorrect');
+            correctBtn.classList.add('correct');
+            document.getElementById('emotion-prompt').innerHTML = 
+                `❌ Not quite. The pattern represented <strong>${this.currentEmotion}</strong> emotion.`;
+        }
+        
+        // Show pattern description
+        const pattern = this.emotionPatterns[this.currentEmotion];
+        setTimeout(() => {
+            document.getElementById('emotion-prompt').innerHTML += 
+                `<br><small class="text-gray-600">${pattern.description}</small>`;
+        }, 1000);
+    }
+    
+    resetButtons() {
+        document.querySelectorAll('.emotion-btn').forEach(btn => {
+            btn.classList.remove('correct', 'incorrect');
+            btn.disabled = false;
+        });
+    }
+    
+    nextPattern() {
+        this.generatePattern();
+    }
+    
+    resetGame() {
+        this.gameActive = false;
+        this.currentEmotion = null;
+        this.correctDetections = 0;
+        this.totalAttempts = 0;
+        
+        document.getElementById('start-detection').style.display = 'inline-block';
+        document.getElementById('emotion-options').classList.add('hidden');
+        document.getElementById('next-pattern').classList.add('hidden');
+        
+        this.drawInstructions();
+        this.updateStats();
+        this.resetButtons();
+        
+        document.getElementById('emotion-prompt').textContent = 
+            'Click "Start Detection" to begin identifying emotional patterns!';
+        
+        this.saveProgress();
+    }
+    
+    drawInstructions() {
+        this.clearCanvas();
+        this.ctx.fillStyle = '#6b7280';
+        this.ctx.font = '18px Arial';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('Emotional Pattern Recognition Game', this.canvas.width / 2, this.canvas.height / 2 - 20);
+        
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText('Learn to identify emotions through visual patterns', this.canvas.width / 2, this.canvas.height / 2 + 10);
+        this.ctx.textAlign = 'left';
+    }
+    
+    clearCanvas() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    
+    updateStats() {
+        document.getElementById('correct-detections').textContent = this.correctDetections;
+        document.getElementById('total-attempts').textContent = this.totalAttempts;
+        
+        const accuracy = this.totalAttempts > 0 ? 
+            Math.round((this.correctDetections / this.totalAttempts) * 100) : 0;
+        document.getElementById('accuracy-rate').textContent = accuracy + '%';
+    }
+    
+    updateInsights() {
+        const insight = this.insights[Math.floor(Math.random() * this.insights.length)];
+        document.getElementById('insight-text').textContent = insight;
+    }
+    
+    saveProgress() {
+        const progress = {
+            correctDetections: this.correctDetections,
+            totalAttempts: this.totalAttempts
+        };
+        localStorage.setItem('emotionDetectiveProgress', JSON.stringify(progress));
+    }
+    
+    loadProgress() {
+        const saved = localStorage.getItem('emotionDetectiveProgress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.correctDetections = progress.correctDetections || 0;
+            this.totalAttempts = progress.totalAttempts || 0;
+            this.updateStats();
+        }
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new EmotionDetective();
+});
+</script>
+{% endblock %}

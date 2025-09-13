@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-100">
+    <div class="container mx-auto px-4 py-6">
+        <div class="flex gap-6 max-w-6xl mx-auto">
+            <!-- Sidebar -->
+            <div class="w-1/4 bg-white rounded-2xl shadow-lg p-6 h-fit">
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">About this Assessment</h2>
+                </div>
+
+                <div class="space-y-4 text-sm text-gray-600">
+                    <div class="flex items-start space-x-2">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <p><strong>Purpose:</strong> Understand your well-being.</p>
+                    </div>
+                    
+                    <div class="flex items-start space-x-2">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                        <p><strong>Privacy:</strong> Your data secure & confidential</p>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <button type="button" id="save-continue" class="w-full border-2 border-blue-500 text-blue-500 hover:bg-blue-50 font-semibold py-3 px-4 rounded-lg transition duration-300">
+                        Save & Continue Later
+                    </button>
+                </div>
+
+                {% if recent_screening %}
+                <div class="mt-6 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-center text-yellow-700 text-xs">
+                        <i data-lucide="info" class="w-4 h-4 mr-2"></i>
+                        <span>Last completed: {{ recent_screening.created_at.strftime('%d %B %Y') }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Main Assessment Area -->
+            <div class="flex-1">
+                <form method="POST" action="/submit_screening" id="screening-form">
+                    <!-- Progress Header -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="text-sm text-gray-600">
+                                <span id="current-question">Question 1 of 16</span>
+                            </div>
+                            <div class="text-sm text-gray-600">
+                                Estimated Time: 5 minutes
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300" style="width: 6.25%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Question Cards Container -->
+                    <div id="questions-container">
+                        <!-- PHQ-9 Questions -->
+                        {% set phq9_questions = [
+                            "Little interest or pleasure in doing things",
+                            "Feeling down, depressed, or hopeless", 
+                            "Trouble falling or staying asleep, or sleeping too much",
+                            "Feeling tired or having little energy",
+                            "Poor appetite or overeating",
+                            "Feeling bad about yourself or that you are a failure or have let yourself or your family down",
+                            "Trouble concentrating on things, such as reading the newspaper or watching television",
+                            "Moving or speaking so slowly that other people could have noticed, or being so restless that you have been moving around a lot more than usual",
+                            "Thoughts that you would be better off dead, or thoughts of hurting yourself"
+                        ] %}
+
+                        {% set gad7_questions = [
+                            "Feeling nervous, anxious, or on edge",
+                            "Not being able to stop or control worrying",
+                            "Worrying too much about different things",
+                            "Trouble relaxing",
+                            "Being so restless that it's hard to sit still",
+                            "Becoming easily annoyed or irritable",
+                            "Feeling afraid as if something awful might happen"
+                        ] %}
+
+                        <!-- PHQ-9 Question Cards -->
+                        {% for question in phq9_questions %}
+                        <div class="question-card bg-white rounded-2xl shadow-lg p-8 mb-6 {% if loop.index > 1 %}hidden{% endif %}" data-question="{{ loop.index }}" data-type="phq9">
+                            <div class="flex items-start space-x-6">
+                                <div class="flex-1">
+                                    <div class="mb-6">
+                                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                                            {% if loop.index == 1 %}
+                                                PHQ-9 Depression Assessment
+                                            {% else %}
+                                                Question {{ loop.index }} of 16
+                                            {% endif %}
+                                        </h2>
+                                        
+                                        <div class="mb-6">
+                                            <p class="text-lg text-gray-700 mb-2">{{ question }}</p>
+                                            <p class="text-sm text-gray-500 hindi-text">
+                                                Over the last 2 weeks, how often have you been bothered by any of the problems? / पिछले 2 हफ्तों में, आप इन समस्याओं से कितनी बार परेशान हुए हैं?
+                                            </p>
+                                        </div>
+
+                                        <!-- Response Options -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="phq9_{{ loop.index }}" value="0" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">Not all</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">बिल्कुल नहीं</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="phq9_{{ loop.index }}" value="1" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-green-400 hover:bg-green-50 transition duration-200 bg-green-100">
+                                                    <div class="font-semibold text-gray-700">Several days</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">कुछ दिन</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="phq9_{{ loop.index }}" value="2" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-yellow-400 hover:bg-yellow-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">More than half days</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">आधे से अधिक दिन</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="phq9_{{ loop.index }}" value="3" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-red-400 hover:bg-red-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">Nearly every day</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">लगभग हर दिन</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Illustration -->
+                                <div class="hidden lg:block w-48 flex-shrink-0">
+                                    <div class="bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl p-6 h-48 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                                <i data-lucide="user" class="w-8 h-8 text-white"></i>
+                                            </div>
+                                            <div class="w-12 h-12 bg-green-400 rounded-full mx-auto mb-2"></div>
+                                            <div class="text-xs text-gray-600">Taking care of yourself</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                                <button type="button" class="previous-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-xl transition duration-200 {% if loop.index == 1 %}invisible{% endif %}">
+                                    Previous
+                                </button>
+                                
+                                <button type="button" class="next-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition duration-200">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- GAD-7 Question Cards -->
+                        {% for question in gad7_questions %}
+                        <div class="question-card bg-white rounded-2xl shadow-lg p-8 mb-6 hidden" data-question="{{ loop.index + 9 }}" data-type="gad7">
+                            <div class="flex items-start space-x-6">
+                                <div class="flex-1">
+                                    <div class="mb-6">
+                                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                                            {% if loop.index == 1 %}
+                                                GAD-7 Anxiety Assessment
+                                            {% else %}
+                                                Question {{ loop.index + 9 }} of 16
+                                            {% endif %}
+                                        </h2>
+                                        
+                                        <div class="mb-6">
+                                            <p class="text-lg text-gray-700 mb-2">{{ question }}</p>
+                                            <p class="text-sm text-gray-500 hindi-text">
+                                                Over the last 2 weeks, how often have you been bothered by the following problems? / पिछले 2 हफ्तों में, आप निम्नलिखित समस्याओं से कितनी बार परेशान हुए हैं?
+                                            </p>
+                                        </div>
+
+                                        <!-- Response Options -->
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="gad7_{{ loop.index }}" value="0" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-400 hover:bg-blue-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">Not all</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">बिल्कुल नहीं</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="gad7_{{ loop.index }}" value="1" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-green-400 hover:bg-green-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">Several days</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">कुछ दिन</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="gad7_{{ loop.index }}" value="2" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-yellow-400 hover:bg-yellow-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">More than half days</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">आधे से अधिक दिन</div>
+                                                </div>
+                                            </label>
+
+                                            <label class="response-option cursor-pointer">
+                                                <input type="radio" name="gad7_{{ loop.index }}" value="3" class="hidden" required>
+                                                <div class="border-2 border-gray-200 rounded-xl p-4 text-center hover:border-red-400 hover:bg-red-50 transition duration-200">
+                                                    <div class="font-semibold text-gray-700">Nearly every day</div>
+                                                    <div class="text-sm text-gray-500 hindi-text mt-1">लगभग हर दिन</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Illustration -->
+                                <div class="hidden lg:block w-48 flex-shrink-0">
+                                    <div class="bg-gradient-to-br from-yellow-100 to-orange-100 rounded-2xl p-6 h-48 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                                <i data-lucide="zap" class="w-8 h-8 text-white"></i>
+                                            </div>
+                                            <div class="w-12 h-12 bg-green-400 rounded-full mx-auto mb-2"></div>
+                                            <div class="text-xs text-gray-600">Managing anxiety</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Buttons -->
+                            <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
+                                <button type="button" class="previous-btn bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold px-6 py-3 rounded-xl transition duration-200">
+                                    Previous
+                                </button>
+                                
+                                {% if loop.index == gad7_questions|length %}
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 rounded-xl transition duration-200">
+                                    Submit Assessment
+                                </button>
+                                {% else %}
+                                <button type="button" class="next-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-xl transition duration-200">
+                                    Next
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Button -->
+    <div class="fixed bottom-6 right-6">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition duration-300">
+            <i data-lucide="help-circle" class="w-6 h-6"></i>
+        </button>
+    </div>
+
+    <!-- Disclaimer Modal (Hidden by default) -->
+    <div id="disclaimer-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Important Note</h3>
+            <p class="text-gray-600 text-sm mb-6">
+                This screening is not a diagnosis. It's a tool to help identify symptoms that may benefit from professional attention. 
+                If you're in crisis or having thoughts of self-harm, please contact emergency services immediately.
+            </p>
+            <button onclick="hideDisclaimer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-xl transition duration-200">
+                I Understand
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+.response-option input:checked + div {
+    border-color: #3B82F6;
+    background-color: #EFF6FF;
+    border-width: 3px;
+}
+
+.question-card {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+let currentQuestion = 1;
+const totalQuestions = 16;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize first question
+    showQuestion(1);
+    
+    // Add event listeners for navigation
+    document.querySelectorAll('.next-btn').forEach(btn => {
+        btn.addEventListener('click', nextQuestion);
+    });
+    
+    document.querySelectorAll('.previous-btn').forEach(btn => {
+        btn.addEventListener('click', previousQuestion);
+    });
+    
+    // Add event listeners for radio button selections
+    document.querySelectorAll('.response-option').forEach(option => {
+        option.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            
+            // Remove selection from siblings
+            const siblings = this.parentElement.querySelectorAll('.response-option');
+            siblings.forEach(sibling => {
+                sibling.classList.remove('selected');
+            });
+            
+            // Add selection to this option
+            this.classList.add('selected');
+            
+            // Auto-advance after a short delay
+            setTimeout(() => {
+                if (currentQuestion < totalQuestions) {
+                    nextQuestion();
+                }
+            }, 800);
+        });
+    });
+
+    // Save and continue later functionality
+    document.getElementById('save-continue').addEventListener('click', function() {
+        saveProgress();
+        alert('Progress saved! You can continue later from where you left off.');
+    });
+});
+
+function showQuestion(questionNumber) {
+    // Hide all questions
+    document.querySelectorAll('.question-card').forEach(card => {
+        card.classList.add('hidden');
+    });
+    
+    // Show current question
+    const currentCard = document.querySelector(`[data-question="${questionNumber}"]`);
+    if (currentCard) {
+        currentCard.classList.remove('hidden');
+    }
+    
+    // Update progress
+    updateProgress(questionNumber);
+    
+    // Update question counter
+    document.getElementById('current-question').textContent = `Question ${questionNumber} of ${totalQuestions}`;
+}
+
+function nextQuestion() {
+    const currentCard = document.querySelector(`[data-question="${currentQuestion}"]:not(.hidden)`);
+    const selectedOption = currentCard.querySelector('input[type="radio"]:checked');
+    
+    if (!selectedOption) {
+        alert('Please select an answer before proceeding.');
+        return;
+    }
+    
+    if (currentQuestion < totalQuestions) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestion > 1) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+    }
+}
+
+function updateProgress(questionNumber) {
+    const progressPercent = (questionNumber / totalQuestions) * 100;
+    document.getElementById('progress-bar').style.width = progressPercent + '%';
+}
+
+function saveProgress() {
+    const formData = new FormData(document.getElementById('screening-form'));
+    const progressData = {
+        currentQuestion: currentQuestion,
+        answers: {}
+    };
+    
+    for (let [key, value] of formData.entries()) {
+        progressData.answers[key] = value;
+    }
+    
+    localStorage.setItem('screeningProgress', JSON.stringify(progressData));
+}
+
+function loadProgress() {
+    const saved = localStorage.getItem('screeningProgress');
+    if (saved) {
+        const progressData = JSON.parse(saved);
+        currentQuestion = progressData.currentQuestion || 1;
+        
+        // Restore answers
+        for (let [key, value] of Object.entries(progressData.answers)) {
+            const input = document.querySelector(`input[name="${key}"][value="${value}"]`);
+            if (input) {
+                input.checked = true;
+                input.closest('.response-option').classList.add('selected');
+            }
+        }
+        
+        showQuestion(currentQuestion);
+    }
+}
+
+function hideDisclaimer() {
+    document.getElementById('disclaimer-modal').classList.add('hidden');
+}
+
+// Load saved progress on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadProgress();
+});
+
+// Show disclaimer on first visit
+if (!localStorage.getItem('disclaimerSeen')) {
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            document.getElementById('disclaimer-modal').classList.remove('hidden');
+            localStorage.setItem('disclaimerSeen', 'true');
+        }, 1000);
+    });
+}
+</script>
+{% endblock %}

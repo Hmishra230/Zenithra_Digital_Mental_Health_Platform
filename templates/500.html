@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-red-50 to-orange-100 flex items-center justify-center px-4">
+    <div class="text-center max-w-lg">
+        <div class="mb-8">
+            <i data-lucide="alert-triangle" class="w-24 h-24 text-red-600 mx-auto mb-6"></i>
+            <h1 class="text-7xl font-bold text-red-600 mb-4">500</h1>
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Internal Server Error</h2>
+            <p class="text-xl text-gray-600 mb-2">
+                Oops! Something went wrong on```r end.
+            </p>
+            <p class="text-lg text-gray-500 hindi-text mb-8">
+                कुछ तकनीकी समस्या ह```है। कृपया पुन```्रयास करें```           </p>
+        </div>
+        
+        <div class="space-y-4">
+            <a href="/" class="inline```ock bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition duration-300">
+                <i data-lucide="home" class="w-5 h-5 mr-2 inline"></i>
+                Go to Home
+            </a>
+            <div class="text-gray-500">
+                <p class="text-sm">If the problem persists, please```ntact support```p>
+                <p class="text-sm font-semibold">📞 Crisis Helpline: 1800-599-0019</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

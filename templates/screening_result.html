@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                Your Screening Results
+            </h1>
+            <p class="text-xl text-gray-600 hindi-text">
+                आपके मूल्यांकन के परिणाम
+            </p>
+        </div>
+
+        <!-- Results Summary -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <!-- PHQ-9 Results -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <i data-lucide="heart" class="w-8 h-8 text-red-600 mr-3"></i>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">PHQ-9 Depression</h2>
+                        <p class="text-gray-600">Depression Assessment</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <div class="text-4xl font-bold text-red-600 mb-2">{{ screening.phq9_score }}/27</div>
+                    <div class="text-lg font-semibold text-gray-800">{{ screening.phq9_category }}</div>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div class="bg-{% if screening.phq9_score <= 4 %}green{% elif screening.phq9_score <= 9 %}yellow{% elif screening.phq9_score <= 14 %}orange{% else %}red{% endif %}-500 h-3 rounded-full" 
+                         style="width: {{ (screening.phq9_score / 27 * 100) }}%"></div>
+                </div>
+                
+                <p class="text-sm text-gray-600">
+                    {% if screening.phq9_score <= 4 %}
+                        Minimal or no depression symptoms detected.
+                    {% elif screening.phq9_score <= 9 %}
+                        Mild depression symptoms. Consider lifestyle changes and monitoring.
+                    {% elif screening.phq9_score <= 14 %}
+                        Moderate depression symptoms. Professional support recommended.
+                    {% elif screening.phq9_score <= 19 %}
+                        Moderately severe depression. Professional help strongly recommended.
+                    {% else %}
+                        Severe depression symptoms. Immediate professional intervention recommended.
+                    {% endif %}
+                </p>
+            </div>
+
+            <!-- GAD-7 Results -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <i data-lucide="zap" class="w-8 h-8 text-yellow-600 mr-3"></i>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-800">GAD-7 Anxiety</h2>
+                        <p class="text-gray-600">Anxiety Assessment</p>
+                    </div>
+                </div>
+                
+                <div class="text-center mb-4">
+                    <div class="text-4xl font-bold text-yellow-600 mb-2">{{ screening.gad7_score }}/21</div>
+                    <div class="text-lg font-semibold text-gray-800">{{ screening.gad7_category }}</div>
+                </div>
+                
+                <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                    <div class="bg-{% if screening.gad7_score <= 4 %}green{% elif screening.gad7_score <= 9 %}yellow{% elif screening.gad7_score <= 14 %}orange{% else %}red{% endif %}-500 h-3 rounded-full" 
+                         style="width: {{ (screening.gad7_score / 21 * 100) }}%"></div>
+                </div>
+                
+                <p class="text-sm text-gray-600">
+                    {% if screening.gad7_score <= 4 %}
+                        Minimal or no anxiety symptoms detected.
+                    {% elif screening.gad7_score <= 9 %}
+                        Mild anxiety symptoms. Consider stress management techniques.
+                    {% elif screening.gad7_score <= 14 %}
+                        Moderate anxiety symptoms. Professional support may be helpful.
+                    {% else %}
+                        Severe anxiety symptoms. Professional help strongly recommended.
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- Overall Risk Level -->
+        <div class="bg-{% if screening.risk_level == 'high' %}red{% elif screening.risk_level == 'moderate' %}yellow{% else %}green{% endif %}-50 border-l-4 border-{% if screening.risk_level == 'high' %}red{% elif screening.risk_level == 'moderate' %}yellow{% else %}green{% endif %}-500 p-6 rounded-lg mb-8">
+            <div class="flex items-center mb-4">
+                <i data-lucide="{% if screening.risk_level == 'high' %}alert-triangle{% elif screening.risk_level == 'moderate' %}alert-circle{% else %}check-circle{% endif %}" 
+                   class="w-6 h-6 text-{% if screening.risk_level == 'high' %}red{% elif screening.risk_level == 'moderate' %}yellow{% else %}green{% endif %}-600 mr-3"></i>
+                <h3 class="text-xl font-bold text-{% if screening.risk_level == 'high' %}red{% elif screening.risk_level == 'moderate' %}yellow{% else %}green{% endif %}-800">
+                    Risk Level: {{ screening.risk_level.title() }}
+                </h3>
+            </div>
+            
+            {% if screening.risk_level == 'high' %}
+                <p class="text-red-700 mb-4">
+                    Your screening indicates significant mental health symptoms that require immediate attention. 
+                    Please reach out for professional support right away.
+                </p>
+                <div class="bg-red-100 p-4 rounded-lg">
+                    <h4 class="font-bold text-red-800 mb-2">Immediate Action Required:</h4>
+                    <div class="space-y-2 text-red-700">
+                        <p>📞 Contact Dr. Priya Sharma: 9152987821</p>
+                        <p>📞 24/7 Crisis Helpline: 1800-599-0019</p>
+                        <p>📞 Emergency Services: 112</p>
+                    </div>
+                </div>
+            {% elif screening.risk_level == 'moderate' %}
+                <p class="text-yellow-700">
+                    Your screening indicates moderate mental health symptoms. It would be beneficial to speak with a counselor 
+                    and implement some coping strategies.
+                </p>
+            {% else %}
+                <p class="text-green-700">
+                    Your screening indicates minimal mental health symptoms. Continue with your current self-care practices 
+                    and reach out if you notice any changes in your mental health.
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Personalized Recommendations -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i data-lucide="lightbulb" class="w-6 h-6 mr-3 text-blue-600"></i>
+                Personalized Recommendations
+            </h3>
+            
+            <div class="space-y-3">
+                {% for recommendation in recommendations %}
+                    <div class="flex items-start">
+                        <i data-lucide="check" class="w-5 h-5 text-green-600 mr-3 mt-0.5"></i>
+                        <p class="text-gray-700">{{ recommendation }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                <i data-lucide="message-circle" class="w-12 h-12 text-blue-600 mx-auto mb-4"></i>
+                <h4 class="text-lg font-bold text-gray-800 mb-2">Chat Support</h4>
+                <p class="text-gray-600 mb-4 text-sm">Talk to our AI counselor for immediate support and guidance</p>
+                <a href="/chat" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
+                    Start Chat
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                <i data-lucide="book-open" class="w-12 h-12 text-green-600 mx-auto mb-4"></i>
+                <h4 class="text-lg font-bold text-gray-800 mb-2">Resources</h4>
+                <p class="text-gray-600 mb-4 text-sm">Access curated mental health resources and self-help materials</p>
+                <a href="/resources" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
+                    Browse Resources
+                </a>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow-lg p-6 text-center">
+                <i data-lucide="users" class="w-12 h-12 text-purple-600 mx-auto mb-4"></i>
+                <h4 class="text-lg font-bold text-gray-800 mb-2">Peer Support</h4>
+                <p class="text-gray-600 mb-4 text-sm">Connect with other students in our anonymous support forum</p>
+                <a href="/forum" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200">
+                    Join Forum
+                </a>
+            </div>
+        </div>
+
+        <!-- Track Progress -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">Track Your Mental Health Journey</h3>
+                    <p class="text-gray-600">Regular mood tracking can help you understand patterns and improve your wellbeing</p>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="/mood_tracker" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200 flex items-center">
+                        <i data-lucide="activity" class="w-4 h-4 mr-2"></i>
+                        Mood Tracker
+                    </a>
+                    <a href="/screening" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition duration-200 flex items-center">
+                        <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i>
+                        Retake Screening
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

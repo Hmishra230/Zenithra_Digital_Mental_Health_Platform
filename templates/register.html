@@ -1,0 +1,206 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center">
+            <i data-lucide="user-plus" class="w-16 h-16 text-green-600 mx-auto mb-4"></i>
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                Create Your Account
+            </h2>
+            <p class="text-gray-600 hindi-text">
+                अपना खाता बनाएं - Join Our Supportive Community
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Your mental health journey starts here
+            </p>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="POST" action="/register">
+            <div class="space-y-4">
+                <!-- Full Name -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">
+                        Full Name <span class="text-red-500">*</span>
+                    </label>
+                    <input id="name" name="name" type="text" required 
+                           class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                           placeholder="Enter your full name">
+                </div>
+                
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Email Address <span class="text-red-500">*</span>
+                    </label>
+                    <input id="email" name="email" type="email" required 
+                           class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                           placeholder="Enter your email address">
+                </div>
+                
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">
+                        Password <span class="text-red-500">*</span>
+                    </label>
+                    <input id="password" name="password" type="password" required 
+                           class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                           placeholder="Create a secure password">
+                </div>
+                
+                <!-- Academic Info Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Year of Study -->
+                    <div>
+                        <label for="year" class="block text-sm font-medium text-gray-700">
+                            Year of Study <span class="text-red-500">*</span>
+                        </label>
+                        <select id="year" name="year" required 
+                                class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="">Select Year</option>
+                            <option value="First Year">First Year</option>
+                            <option value="Second Year">Second Year</option>
+                            <option value="Third Year">Third Year</option>
+                            <option value="Final Year">Final Year</option>
+                            <option value="Postgraduate">Postgraduate</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Age -->
+                    <div>
+                        <label for="age" class="block text-sm font-medium text-gray-700">
+                            Age <span class="text-red-500">*</span>
+                        </label>
+                        <input id="age" name="age" type="number" min="16" max="30" required 
+                               class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="Age">
+                    </div>
+                </div>
+                
+                <!-- Branch -->
+                <div>
+                    <label for="branch" class="block text-sm font-medium text-gray-700">
+                        Branch/Department <span class="text-red-500">*</span>
+                    </label>
+                    <input id="branch" name="branch" type="text" required 
+                           class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                           placeholder="e.g., Computer Science Engineering">
+                </div>
+                
+                <!-- Optional Information -->
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Gender -->
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">
+                            Gender (Optional)
+                        </label>
+                        <select id="gender" name="gender" 
+                                class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                            <option value="Not specified">Prefer not to say</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Non-binary">Non-binary</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Location -->
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700">
+                            Home State
+                        </label>
+                        <input id="location" name="location" type="text" 
+                               class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="e.g., Punjab">
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">
+                            Phone Number (Optional)
+                        </label>
+                        <input id="phone" name="phone" type="tel" 
+                               class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="Your phone number">
+                    </div>
+                    
+                    <div>
+                        <label for="emergency_contact" class="block text-sm font-medium text-gray-700">
+                            Emergency Contact
+                        </label>
+                        <input id="emergency_contact" name="emergency_contact" type="tel" 
+                               class="mt-1 block w-full px-3 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500" 
+                               placeholder="Family member number">
+                    </div>
+                </div>
+                
+                <!-- Hostel Resident -->
+                <div class="flex items-center">
+                    <input id="hostel_resident" name="hostel_resident" type="checkbox" 
+                           class="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded">
+                    <label for="hostel_resident" class="ml-2 block text-sm text-gray-700">
+                        I live in hostel/campus accommodation
+                    </label>
+                </div>
+            </div>
+
+            <!-- Privacy Notice -->
+            <div class="bg-blue-50 p-4 rounded-lg">
+                <div class="flex items-start">
+                    <i data-lucide="shield-check" class="w-5 h-5 text-blue-600 mr-2 mt-0.5"></i>
+                    <div class="text-sm">
+                        <h4 class="font-semibold text-blue-800 mb-1">Privacy & Safety</h4>
+                        <p class="text-blue-700">
+                            Your personal information is secure and confidential. We use anonymization for forum posts and maintain strict privacy standards.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div>
+                <button type="submit" 
+                        class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium text-lg transition duration-200">
+                    <i data-lucide="user-plus" class="w-5 h-5 mr-2"></i>
+                    Create My Account
+                </button>
+            </div>
+
+            <!-- Login Link -->
+            <div class="text-center">
+                <p class="text-sm text-gray-600">
+                    Already have an account? 
+                    <a href="/login" class="font-medium text-green-600 hover:text-green-500 transition duration-200">
+                        Sign in here
+                    </a>
+                </p>
+            </div>
+        </form>
+
+        <!-- Benefits Section -->
+        <div class="mt-6 bg-white p-4 rounded-lg shadow-md">
+            <h3 class="text-sm font-semibold text-gray-800 mb-2 text-center">Why Join Our Platform?</h3>
+            <div class="grid grid-cols-2 gap-3 text-xs text-gray-600">
+                <div class="flex items-center">
+                    <i data-lucide="shield" class="w-3 h-3 mr-1 text-green-600"></i>
+                    <span>100% Anonymous Support</span>
+                </div>
+                <div class="flex items-center">
+                    <i data-lucide="clock" class="w-3 h-3 mr-1 text-blue-600"></i>
+                    <span>24/7 AI Counselor</span>
+                </div>
+                <div class="flex items-center">
+                    <i data-lucide="users" class="w-3 h-3 mr-1 text-purple-600"></i>
+                    <span>Peer Community</span>
+                </div>
+                <div class="flex items-center">
+                    <i data-lucide="heart" class="w-3 h-3 mr-1 text-red-600"></i>
+                    <span>Professional Care</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

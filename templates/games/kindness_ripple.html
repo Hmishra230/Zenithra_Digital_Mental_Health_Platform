@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl font-bold text-teal-600 mb-4">🌊 Kindness Ripple</h1>
+        <p class="text-lg text-gray-600 mb-8 hindi-text">दयालुता की लहर - Create ripple effects of kindness</p>
+        
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <div class="ripple-container mb-6">
+                <canvas id="ripple-canvas" width="600" height="400" class="border-2 border-gray-200 rounded-lg mx-auto"></canvas>
+            </div>
+            
+            <div class="kindness-selector mb-6">
+                <h3 class="text-lg font-semibold mb-4">Choose a Kindness Act:</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button class="kindness-btn" data-kindness="smile">
+                        😊 Share a Smile
+                    </button>
+                    <button class="kindness-btn" data-kindness="help">
+                        🤝 Help Someone
+                    </button>
+                    <button class="kindness-btn" data-kindness="listen">
+                        👂 Listen Actively
+                    </button>
+                    <button class="kindness-btn" data-kindness="compliment">
+                        💝 Give Compliment
+                    </button>
+                </div>
+            </div>
+            
+            <div class="ripple-controls mb-6">
+                <button id="create-ripple" class="bg-teal-600 hover:bg-teal-700 text-white px-8 py-3 rounded-lg">
+                    Perform Act of Kindness
+                </button>
+                <button id="auto-ripple" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg ml-4">
+                    Auto Ripple
+                </button>
+            </div>
+            
+            <div class="kindness-stats grid grid-cols-3 gap-4 text-center">
+                <div>
+                    <div id="total-ripples" class="text-3xl font-bold text-teal-600">0</div>
+                    <div class="text-sm text-gray-600">Total Ripples</div>
+                </div>
+                <div>
+                    <div id="people-affected" class="text-3xl font-bold text-blue-600">0</div>
+                    <div class="text-sm text-gray-600">People Affected</div>
+                </div>
+                <div>
+                    <div id="kindness-level" class="text-3xl font-bold text-green-600">1</div>
+                    <div class="text-sm text-gray-600">Kindness Level</div>
+                </div>
+            </div>
+            
+            <div class="impact-message mt-6 p-4 bg-teal-50 rounded-lg">
+                <div id="impact-text" class="text-teal-700">
+                    Click "Perform Act of Kindness" to start spreading positivity!
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <a href="/game_zone" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold">
+                Back to Game Zone
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+#ripple-canvas {
+    max-width: 100%;
+    height: auto;
+    background: linear-gradient(135deg, #e6fffa 0%, #b2f5ea 100%);
+}
+
+.kindness-btn {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.75rem;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.kindness-btn:hover {
+    border-color: #14b8a6;
+    background: #f0fdfa;
+    transform: translateY(-2px);
+}
+
+.kindness-btn.selected {
+    border-color: #14b8a6;
+    background: #14b8a6;
+    color: white;
+}
+
+@keyframes rippleExpand {
+    0% {
+        transform: scale(0);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.ripple-effect {
+    animation: rippleExpand 2s ease-out forwards;
+}
+</style>
+
+<script>
+class KindnessRipple {
+    constructor() {
+        this.canvas = document.getElementById('ripple-canvas');
+        this.ctx = this.canvas.getContext('2d');
+        this.ripples = [];
+        this.totalRipples = 0;
+        this.peopleAffected = 0;
+        this.kindnessLevel = 1;
+        this.selectedKindness = 'smile';
+        this.autoRippleActive = false;
+        
+        this.kindnessTypes = {
+            smile: { color: '#fbbf24', impact: 3, message: 'Your smile brightened 3 people\'s day!' },
+            help: { color: '#10b981', impact: 5, message: 'Your help inspired 5 others to help!' },
+            listen: { color: '#3b82f6', impact: 4, message: 'Active listening created 4 meaningful connections!' },
+            compliment: { color: '#ec4899', impact: 6, message: 'Your compliment boosted 6 people\'s confidence!' }
+        };
+        
+        this.initializeGame();
+        this.loadProgress();
+        this.gameLoop();
+    }
+    
+    initializeGame() {
+        this.setupEventListeners();
+        this.resizeCanvas();
+        this.updateStats();
+    }
+    
+    setupEventListeners() {
+        // Kindness selection
+        document.querySelectorAll('.kindness-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.kindness-btn').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                this.selectedKindness = btn.dataset.kindness;
+            });
+        });
+        
+        // Ripple controls
+        document.getElementById('create-ripple').addEventListener('click', () => {
+            this.createRipple();
+        });
+        
+        document.getElementById('auto-ripple').addEventListener('click', () => {
+            this.toggleAutoRipple();
+        });
+        
+        // Canvas click for ripples
+        this.canvas.addEventListener('click', (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left) * (this.canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (this.canvas.height / rect.height);
+            this.createRippleAt(x, y);
+        });
+        
+        // Window resize
+        window.addEventListener('resize', () => this.resizeCanvas());
+    }
+    
+    resizeCanvas() {
+        const container = this.canvas.parentElement;
+        const maxWidth = Math.min(600, container.clientWidth - 40);
+        this.canvas.style.width = maxWidth + 'px';
+        this.canvas.style.height = (maxWidth * 0.67) + 'px';
+    }
+    
+    createRipple() {
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        this.createRippleAt(centerX, centerY);
+        
+        const kindness = this.kindnessTypes[this.selectedKindness];
+        this.peopleAffected += kindness.impact;
+        this.updateImpactMessage(kindness.message);
+        
+        // Create secondary ripples
+        setTimeout(() => {
+            for (let i = 0; i < kindness.impact; i++) {
+                const angle = (i / kindness.impact) * Math.PI * 2;
+                const distance = 100 + Math.random() * 100;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                this.createRippleAt(x, y, 0.7);
+            }
+        }, 1000);
+        
+        this.updateKindnessLevel();
+        this.updateStats();
+        this.saveProgress();
+    }
+    
+    createRippleAt(x, y, intensity = 1) {
+        const kindness = this.kindnessTypes[this.selectedKindness];
+        
+        this.ripples.push({
+            x: x,
+            y: y,
+            radius: 0,
+            maxRadius: 80 * intensity,
+            opacity: 0.8 * intensity,
+            color: kindness.color,
+            speed: 2,
+            startTime: Date.now()
+        });
+        
+        this.totalRipples++;
+    }
+    
+    toggleAutoRipple() {
+        this.autoRippleActive = !this.autoRippleActive;
+        const btn = document.getElementById('auto-ripple');
+        
+        if (this.autoRippleActive) {
+            btn.textContent = 'Stop Auto';
+            btn.className = 'bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg ml-4';
+            this.startAutoRipple();
+        } else {
+            btn.textContent = 'Auto Ripple';
+            btn.className = 'bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg ml-4';
+        }
+    }
+    
+    startAutoRipple() {
+        if (!this.autoRippleActive) return;
+        
+        const x = Math.random() * this.canvas.width;
+        const y = Math.random() * this.canvas.height;
+        this.createRippleAt(x, y, 0.5);
+        
+        setTimeout(() => this.startAutoRipple(), 500 + Math.random() * 1000);
+    }
+    
+    updateKindnessLevel() {
+        this.kindnessLevel = Math.floor(this.totalRipples / 10) + 1;
+    }
+    
+    updateImpactMessage(message) {
+        document.getElementById('impact-text').textContent = message;
+        
+        // Reset message after 3 seconds
+        setTimeout(() => {
+            document.getElementById('impact-text').textContent = 
+                'Every act of kindness creates ripples that spread throughout the community!';
+        }, 3000);
+    }
+    
+    updateStats() {
+        document.getElementById('total-ripples').textContent = this.totalRipples;
+        document.getElementById('people-affected').textContent = this.peopleAffected;
+        document.getElementById('kindness-level').textContent = this.kindnessLevel;
+    }
+    
+    gameLoop() {
+        this.update();
+        this.draw();
+        requestAnimationFrame(() => this.gameLoop());
+    }
+    
+    update() {
+        const now = Date.now();
+        
+        this.ripples = this.ripples.filter(ripple => {
+            ripple.radius += ripple.speed;
+            ripple.opacity = Math.max(0, ripple.opacity - 0.02);
+            
+            return ripple.radius < ripple.maxRadius && ripple.opacity > 0;
+        });
+    }
+    
+    draw() {
+        // Clear canvas with gradient background
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+        gradient.addColorStop(0, '#e6fffa');
+        gradient.addColorStop(1, '#b2f5ea');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw ripples
+        this.ripples.forEach(ripple => {
+            this.ctx.save();
+            this.ctx.globalAlpha = ripple.opacity;
+            this.ctx.strokeStyle = ripple.color;
+            this.ctx.lineWidth = 3;
+            this.ctx.beginPath();
+            this.ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+            this.ctx.stroke();
+            
+            // Inner ripple
+            this.ctx.globalAlpha = ripple.opacity * 0.3;
+            this.ctx.fillStyle = ripple.color;
+            this.ctx.beginPath();
+            this.ctx.arc(ripple.x, ripple.y, ripple.radius * 0.5, 0, Math.PI * 2);
+            this.ctx.fill();
+            
+            this.ctx.restore();
+        });
+        
+        // Draw instructions if no ripples
+        if (this.ripples.length === 0 && this.totalRipples === 0) {
+            this.ctx.fillStyle = '#14b8a6';
+            this.ctx.font = '18px Arial';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText('Click anywhere or use the button to create kindness ripples!', 
+                             this.canvas.width / 2, this.canvas.height / 2);
+            this.ctx.textAlign = 'left';
+        }
+    }
+    
+    saveProgress() {
+        const progress = {
+            totalRipples: this.totalRipples,
+            peopleAffected: this.peopleAffected,
+            kindnessLevel: this.kindnessLevel
+        };
+        localStorage.setItem('kindnessRippleProgress', JSON.stringify(progress));
+    }
+    
+    loadProgress() {
+        const saved = localStorage.getItem('kindnessRippleProgress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.totalRipples = progress.totalRipples || 0;
+            this.peopleAffected = progress.peopleAffected || 0;
+            this.kindnessLevel = progress.kindnessLevel || 1;
+        }
+    }
+}
+
+// Initialize the game
+document.addEventListener('DOMContentLoaded', () => {
+    new KindnessRipple();
+});
+</script>
+{% endblock %}
